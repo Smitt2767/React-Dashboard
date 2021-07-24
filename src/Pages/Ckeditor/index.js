@@ -79,6 +79,7 @@ const Ckeditor = (props) => {
               dispatch(
                 editData({ data: ckInstances, id: props.match.params.id })
               );
+              dispatch(setEditMode(false));
             }}
             disabled={ckInstances.some((ck) => ck.data === "")}
           >
@@ -100,6 +101,7 @@ const Ckeditor = (props) => {
             className="text-gray-50 px-10 py-2 font-bold text-xl shadow-lg hover:bg-blue-800 rounded-lg bg-blue-600 ml-8"
             onClick={() => {
               dispatch(clear());
+              dispatch(setEditMode(false));
               props.history.goBack();
             }}
           >
