@@ -10,6 +10,7 @@ import {
   BsPeopleCircle,
   BsLayoutSplit,
   BsPower,
+  BsTerminal,
 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
@@ -24,11 +25,10 @@ const routes = [
   },
   {
     id: 2,
-    path: "/profile",
-    name: "Profile",
-    icon: <BsPeopleCircle className="text-2xl" />,
+    path: "/ckeditor",
+    name: "Ck Editor",
+    icon: <BsTerminal className="text-2xl" />,
   },
-
   {
     id: 3,
     name: "Pages",

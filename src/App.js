@@ -12,6 +12,8 @@ import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
 import _404 from "./Pages/_404";
 
+import Ckeditor from './Pages/Ckeditor'
+
 const App = () => {
   const [openMenu, setOpenMenu] = useState(false);
   return (
@@ -33,6 +35,7 @@ const App = () => {
             <Route path="/profile" exact component={Profile} />
             <Route path="/login" exact component={Login} />
             <Route path="/signup" exact component={Signup} />
+            <Route path="/ckeditor" exact component={Ckeditor} />
             <Route component={_404} />
           </Switch>
         </div>
