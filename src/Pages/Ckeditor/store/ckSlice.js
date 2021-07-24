@@ -17,6 +17,7 @@ const initialState = {
   ],
   ckTableData: [],
   editMode: false,
+  showModal: false,
 };
 
 export const sendData = createAsyncThunk(
@@ -32,6 +33,7 @@ export const sendData = createAsyncThunk(
       if (e.response?.data) {
         dispatch(setErrorMessage(e.response?.data.message));
       }
+      return rejectWithValue({});
     }
   }
 );
@@ -48,6 +50,7 @@ export const editData = createAsyncThunk(
       if (e.response?.data) {
         dispatch(setErrorMessage(e.response?.data.message));
       }
+      return rejectWithValue({});
     }
   }
 );
@@ -64,6 +67,7 @@ export const getData = createAsyncThunk(
       if (e.response?.data) {
         dispatch(setErrorMessage(e.response?.data.message));
       }
+      return rejectWithValue({});
     }
   }
 );
@@ -80,6 +84,7 @@ export const getDataById = createAsyncThunk(
       if (e.response?.data) {
         dispatch(setErrorMessage(e.response?.data.message));
       }
+      return rejectWithValue({});
     }
   }
 );
@@ -99,6 +104,7 @@ export const deleteData = createAsyncThunk(
       if (e.response?.data) {
         dispatch(setErrorMessage(e.response?.data.message));
       }
+      return rejectWithValue({});
     }
   }
 );
@@ -128,28 +134,35 @@ export const ckSlice = createSlice({
         (ck) => ck.id !== action.payload
       );
     },
-    setCkInstance: (state, action) => {},
+
     setEditMode: (state, action) => {
       state.editMode = action.payload;
+    },
+    setShowModal: (state, action) => {
+      state.showModal = action.payload;
+    },
+    clear: (state, action) => {
+      state.ckInstances = initialState.ckInstances;
     },
   },
   extraReducers: {
     [sendData.fulfilled]: (state, action) => {
       state.ckInstances = initialState.ckInstances;
     },
-
     [getData.fulfilled]: (state, action) => {
       state.ckTableData = action.payload.data;
     },
-
     [getDataById.fulfilled]: (state, action) => {
       state.ckInstances = action.payload.data;
     },
-
     [editData.fulfilled]: (state, action) => {
       state.ckInstances = initialState.ckInstances;
       state.editMode = false;
     },
+    [sendData.rejected]: (state, action) => {},
+    [getData.rejected]: (state, action) => {},
+    [getDataById.rejected]: (state, action) => {},
+    [editData.rejected]: (state, action) => {},
   },
 });
 
@@ -158,8 +171,9 @@ export const {
   deleteInstance,
   handleCkDataChange,
   removeDataFromTableList,
-  setCkInstance,
+  setShowModal,
   setEditMode,
+  clear,
 } = ckSlice.actions;
 
 export default ckSlice.reducer;

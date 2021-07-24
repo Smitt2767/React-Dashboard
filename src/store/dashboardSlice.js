@@ -3,7 +3,6 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   successMessage: "",
   errorMessage: "",
-  showModal: false,
 };
 
 export const dashboardSlice = createSlice({

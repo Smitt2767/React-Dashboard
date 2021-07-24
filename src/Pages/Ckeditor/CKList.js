@@ -1,18 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getData, deleteData } from "./store/ckSlice";
+import { getData, deleteData, setShowModal } from "./store/ckSlice";
 import { BsPencil, BsTrash } from "react-icons/bs";
-const CKList = (props) => {
-  const { ckTableData } = useSelector((state) => state.ck);
-  const dispatch = useDispatch();
+import Alert from "../../Components/Modal/Alert";
 
+const CKList = (props) => {
+  const { ckTableData, showModal } = useSelector((state) => state.ck);
+  const dispatch = useDispatch();
+  const [id, setId] = useState(null);
   useEffect(() => {
     dispatch(getData());
   }, [dispatch]);
 
   const innerTable = (data) => {
     return (
-      <ul className="ck-content">
+      <ul className="ck-content flex flex-col justify-center ">
         {data.map((ckData) => {
           return (
             <li
@@ -25,11 +27,27 @@ const CKList = (props) => {
     );
   };
 
+  const handleButtonClick = (data) => {
+    dispatch(setShowModal(data));
+  };
+
+  const handleYesBtnClicked = () => {
+    if (id) {
+      dispatch(deleteData({ id }));
+    }
+  };
+
   return (
     <div className="w-full h-full py-4 px-4 lg:px-8 flex items-start flex-col">
       <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer mb-8">
         CKEditor List
       </h1>
+      {showModal && id && (
+        <Alert
+          setShowModal={handleButtonClick}
+          handleYesBtnClicked={handleYesBtnClicked}
+        />
+      )}
       <table className="w-full">
         <thead className="bg-gray-700 text-gray-50">
           <tr className="border-t-2 border-l-2 border-r-2 border-gray-300">
@@ -70,7 +88,8 @@ const CKList = (props) => {
                     <button
                       className="bg-red-500 rounded-full p-3 hover:bg-red-700"
                       onClick={() => {
-                        dispatch(deleteData({ id: ck.id }));
+                        setId(ck.id);
+                        dispatch(setShowModal(true));
                       }}
                     >
                       <BsTrash className="text-2xl text-gray-50" />

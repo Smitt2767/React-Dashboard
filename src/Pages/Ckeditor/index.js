@@ -8,6 +8,7 @@ import {
   sendData,
   getDataById,
   editData,
+  clear,
   setEditMode,
 } from "./store/ckSlice";
 
@@ -26,7 +27,7 @@ const Ckeditor = (props) => {
   }, [dispatch, props.match.params.id]);
 
   return (
-    <div className="w-full h-full py-4 px-4 lg:px-8 flex items-start flex-col">
+    <div className="w-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-y-auto">
       <div className="flex justify-between items-center mb-8 w-full">
         <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer">
           CKEditor
@@ -60,10 +61,10 @@ const Ckeditor = (props) => {
           );
         })}
       </div>
-      <div className="w-full mt-8">
+      <div className="w-full mt-8 flex items-center">
         {!editMode ? (
           <button
-            className="bg-green-600 text-gray-50 px-10 py-2 font-bold text-2xl shadow-xl hover:bg-green-800 rounded-lg disabled:bg-gray-400"
+            className="bg-green-600 text-gray-50 px-10 py-2 font-bold text-xl shadow-lg hover:bg-green-800 rounded-lg disabled:bg-gray-400"
             onClick={() => {
               dispatch(sendData(ckInstances));
             }}
@@ -73,7 +74,7 @@ const Ckeditor = (props) => {
           </button>
         ) : (
           <button
-            className="bg-green-600 text-gray-50 px-10 py-2 font-bold text-2xl shadow-xl hover:bg-green-800 rounded-lg disabled:bg-gray-400"
+            className="bg-green-600 text-gray-50 px-10 py-2 font-bold text-xl shadow-lg hover:bg-green-800 rounded-lg disabled:bg-gray-400"
             onClick={() => {
               dispatch(
                 editData({ data: ckInstances, id: props.match.params.id })
@@ -82,6 +83,27 @@ const Ckeditor = (props) => {
             disabled={ckInstances.some((ck) => ck.data === "")}
           >
             Save
+          </button>
+        )}
+        {!editMode ? (
+          <button
+            className="text-gray-50 px-10 py-2 font-bold text-xl shadow-lg hover:bg-blue-800 rounded-lg bg-blue-600 ml-8 disabled:bg-gray-400"
+            disabled={ckInstances.every((ck) => ck.data === "")}
+            onClick={() => {
+              dispatch(clear());
+            }}
+          >
+            Clear
+          </button>
+        ) : (
+          <button
+            className="text-gray-50 px-10 py-2 font-bold text-xl shadow-lg hover:bg-blue-800 rounded-lg bg-blue-600 ml-8"
+            onClick={() => {
+              dispatch(clear());
+              props.history.goBack();
+            }}
+          >
+            Cancel
           </button>
         )}
       </div>

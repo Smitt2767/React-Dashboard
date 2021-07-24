@@ -12,3 +12,7 @@
 .ck-content * {
   all: revert;
 }
+
+.ck * {
+  z-index: 0 !important;
+}

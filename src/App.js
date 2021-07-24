@@ -29,7 +29,6 @@ const App = () => {
   useEffect(() => {
     let id;
     if (successMessage || errorMessage) {
-      console.log("hi");
       id = setTimeout(() => {
         dispatch(setSuccessMessage(""));
         dispatch(setErrorMessage(""));
@@ -39,7 +38,7 @@ const App = () => {
   }, [successMessage, errorMessage, dispatch]);
 
   const alert = {
-    success: successMessage ? true : errorMessage ? false : null,
+    show: successMessage ? true : errorMessage ? true : false,
     bgColor: successMessage ? "bg-green-400" : errorMessage ? "bg-red-400" : "",
     textColor: successMessage
       ? "text-green-900"
@@ -65,7 +64,7 @@ const App = () => {
         <Header openMenu={openMenu} setOpenMenu={setOpenMenu} />
         <Footer />
 
-        {alert.success && (
+        {alert.show && (
           <div
             className={`z-50 py-2 px-4 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex items-center rounded-sm shadow-xl border-b-2 ${alert.bgColor} ${alert.borderColor} ${alert.textColor}`}
           >
