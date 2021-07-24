@@ -5,13 +5,7 @@ import {
   AiOutlineContacts,
   AiOutlineClose,
 } from "react-icons/ai";
-import {
-  BsPeople,
-  BsPeopleCircle,
-  BsLayoutSplit,
-  BsPower,
-  BsTerminal,
-} from "react-icons/bs";
+import { BsPeople, BsPower, BsTerminal } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
 import SidebarSubMenu from "./SidebarSubMenu";
@@ -25,28 +19,21 @@ const routes = [
   },
   {
     id: 2,
-    path: "/ckeditor",
     name: "Ck Editor",
     icon: <BsTerminal className="text-2xl" />,
-  },
-  {
-    id: 3,
-    name: "Pages",
-    icon: <BsLayoutSplit className="text-2xl" />,
     routes: [
-      { id: 1, path: "/login", name: "Login" },
-      { id: 2, path: "/signup", name: "Signup" },
-      { id: 3, path: "/404", name: "404" },
+      { id: 1, path: "/ckeditor", name: "Home" },
+      { id: 2, path: "/ckeditorlist", name: "CKEditor data" },
     ],
   },
   {
-    id: 4,
+    id: 3,
     path: "/about",
     name: "About",
     icon: <BsPeople className="text-2xl" />,
   },
   {
-    id: 5,
+    id: 4,
     path: "/contactus",
     name: "Contact Us",
     icon: <AiOutlineContacts className="text-2xl" />,
