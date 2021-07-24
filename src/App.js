@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Sidebar from "./Components/Slidebar";
+import Header from "./Components/Header";
+import Footer from "./Components/Footer";
 
-function App() {
+import Dashboard from "./Pages/Dashboard";
+import About from "./Pages/About";
+import Contactus from "./Pages/Contactus";
+import Profile from "./Pages/Profile";
+import Login from "./Pages/Login";
+import Signup from "./Pages/Signup";
+import _404 from "./Pages/_404";
+
+const App = () => {
+  const [openMenu, setOpenMenu] = useState(false);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="h-screen relative">
+      <Router>
+        <Sidebar openMenu={openMenu} setOpenMenu={setOpenMenu} />
+        <Header openMenu={openMenu} setOpenMenu={setOpenMenu} />
+        <Footer />
+        <div
+          className="w-full h-full pl-0 lg:pl-64 pt-16 pb-8 overflow-y-auto"
+          onClick={() => {
+            if (openMenu) setOpenMenu(false);
+          }}
         >
-          Learn React
-        </a>
-      </header>
+          <Switch>
+            <Route path="/" exact component={Dashboard} />
+            <Route path="/about" exact component={About} />
+            <Route path="/contactus" exact component={Contactus} />
+            <Route path="/profile" exact component={Profile} />
+            <Route path="/login" exact component={Login} />
+            <Route path="/signup" exact component={Signup} />
+            <Route component={_404} />
+          </Switch>
+        </div>
+      </Router>
     </div>
   );
-}
+};
 
 export default App;
