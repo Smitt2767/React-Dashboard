@@ -4,6 +4,7 @@ import {
   AiOutlineHome,
   AiOutlineContacts,
   AiOutlineClose,
+  AiOutlineForm,
 } from "react-icons/ai";
 import { BsPeople, BsPower, BsTerminal } from "react-icons/bs";
 import { Link } from "react-router-dom";
@@ -19,24 +20,18 @@ const routes = [
   },
   {
     id: 2,
+    path: "/form",
+    icon: <AiOutlineForm className="text-2xl" />,
+    name: "Form",
+  },
+  {
+    id: 3,
     name: "Ck Editor",
     icon: <BsTerminal className="text-2xl" />,
     routes: [
       { id: 1, path: "/ckeditor", name: "Home" },
       { id: 2, path: "/ckeditorlist", name: "CKEditor data" },
     ],
-  },
-  {
-    id: 3,
-    path: "/about",
-    name: "About",
-    icon: <BsPeople className="text-2xl" />,
-  },
-  {
-    id: 4,
-    path: "/contactus",
-    name: "Contact Us",
-    icon: <AiOutlineContacts className="text-2xl" />,
   },
 ];
 

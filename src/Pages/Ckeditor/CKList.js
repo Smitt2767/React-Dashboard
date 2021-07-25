@@ -1,16 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getData, deleteData, setShowModal } from "./store/ckSlice";
+import {
+  getData,
+  deleteData,
+  setShowModal,
+  setPage,
+  claerTableRelatedData,
+} from "./store/ckSlice";
 import { BsPencil, BsTrash } from "react-icons/bs";
 import Alert from "../../Components/Modal/Alert";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const CKList = (props) => {
-  const { ckTableData, showModal } = useSelector((state) => state.ck);
+  const { ckTableData, showModal, page, limit, hasMore } = useSelector(
+    (state) => state.ck
+  );
   const dispatch = useDispatch();
   const [id, setId] = useState(null);
+
   useEffect(() => {
-    dispatch(getData());
+    return () => {
+      dispatch(claerTableRelatedData());
+    };
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getData({ page, limit }));
+  }, [dispatch, page, limit]);
+
+  const next = () => {
+    dispatch(setPage(page + 1));
+    // dispatch(getData({ page: page + 1, limit }));
+  };
 
   const innerTable = (data) => {
     return (
@@ -48,68 +69,83 @@ const CKList = (props) => {
           handleYesBtnClicked={handleYesBtnClicked}
         />
       )}
-      <div className="relative h-screen overflow-y-auto">
-        <table className="w-full ">
-          <thead className="bg-gray-700 text-gray-50 sticky top-0">
-            <tr className="">
-              <th className="text-2xl w-16 py-2 text-center">Id</th>
-              <th className="text-2xl py-2 text-center">Data</th>
-              <th className="text-2xl w-32 py-2 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!ckTableData.length ? (
-              <tr className="border-b-2 border-l-2 border-r-2 border-gray-300">
+      <div className="overflow-auto h-screen" id="scrollableDiv">
+        <InfiniteScroll
+          dataLength={ckTableData.length}
+          next={next}
+          hasMore={hasMore}
+          scrollableTarget="scrollableDiv"
+        >
+          <table className="w-full">
+            <thead className="">
+              <tr className="">
+                <th className="text-2xl w-16 py-2 text-center  bg-gray-700 text-gray-50">
+                  Id
+                </th>
+                <th className="text-2xl py-2 text-center bg-gray-700 text-gray-50">
+                  Data
+                </th>
+                <th className="text-2xl w-32 py-2 text-center bg-gray-700 text-gray-50">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {!ckTableData.length ? (
+                <tr className="border-b-2 border-l-2 border-r-2 border-gray-300">
+                  <td
+                    className="bg-gray-100 text-center py-3 text-2xl"
+                    colSpan="3"
+                  >
+                    No Rcords Found
+                  </td>
+                </tr>
+              ) : (
+                ckTableData.map((ck) => {
+                  return (
+                    <tr className="" key={ck.id}>
+                      <td className="bg-gray-100 text-center py-1 text-2xl">
+                        {ck.id}
+                      </td>
+                      <td className="bg-gray-100 pl-4 lg:pl-8 py-1 text-xl">
+                        {innerTable(ck.data)}
+                      </td>
+                      <td className="bg-gray-100 text-center py-1  ">
+                        <button
+                          className="bg-blue-500 rounded-full p-3 mr-4 hover:bg-blue-700 shadow-lg"
+                          onClick={() => {
+                            props.history.push(`/ckeditor/${ck.id}`);
+                          }}
+                        >
+                          <BsPencil className="text-2xl text-gray-50 " />
+                        </button>
+                        <button
+                          className="bg-red-500 rounded-full p-3 hover:bg-red-700 shadow-lg"
+                          onClick={() => {
+                            setId(ck.id);
+                            dispatch(setShowModal(true));
+                          }}
+                        >
+                          <BsTrash className="text-2xl text-gray-50" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+            <tfoot>
+              <tr className="">
                 <td
-                  className="bg-gray-100 text-center py-3 text-2xl"
                   colSpan="3"
+                  className="bg-gray-700 text-center py-1 text-2xl text-gray-50 sticky bottom-0"
                 >
-                  No Rcords Found
+                  Table Footer
                 </td>
               </tr>
-            ) : (
-              ckTableData.map((ck) => {
-                return (
-                  <tr key={ck.id} className="">
-                    <td className="bg-gray-100 text-center py-1 text-2xl">
-                      {ck.id}
-                    </td>
-                    <td className="bg-gray-100 pl-4 lg:pl-8 py-1 text-xl">
-                      {innerTable(ck.data)}
-                    </td>
-                    <td className="bg-gray-100 text-center py-1  ">
-                      <button
-                        className="bg-blue-500 rounded-full p-3 mr-4 hover:bg-blue-700 shadow-lg"
-                        onClick={() => {
-                          props.history.push(`/ckeditor/${ck.id}`);
-                        }}
-                      >
-                        <BsPencil className="text-2xl text-gray-50 " />
-                      </button>
-                      <button
-                        className="bg-red-500 rounded-full p-3 hover:bg-red-700 shadow-lg"
-                        onClick={() => {
-                          setId(ck.id);
-                          dispatch(setShowModal(true));
-                        }}
-                      >
-                        <BsTrash className="text-2xl text-gray-50" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-            <tr className="sticky bottom-0">
-              <td
-                colSpan="3"
-                className="bg-gray-700 text-center py-1 text-2xl text-gray-50"
-              >
-                Table Footer
-              </td>
-            </tr>
-          </tbody>
-        </table>
+            </tfoot>
+          </table>
+        </InfiniteScroll>
       </div>
     </div>
   );

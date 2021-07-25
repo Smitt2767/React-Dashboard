@@ -18,6 +18,7 @@ import Ckeditor from "./Pages/Ckeditor";
 import CKList from "./Pages/Ckeditor/CKList";
 
 import { IoAlertCircleOutline } from "react-icons/io5";
+import AutoCompleteForm from "./Pages/AutoCompleteForm";
 
 const App = () => {
   const [openMenu, setOpenMenu] = useState(false);
@@ -32,7 +33,7 @@ const App = () => {
       id = setTimeout(() => {
         dispatch(setSuccessMessage(""));
         dispatch(setErrorMessage(""));
-      }, [3000]);
+      }, [5000]);
     }
     return () => clearTimeout(id);
   }, [successMessage, errorMessage, dispatch]);
@@ -66,10 +67,16 @@ const App = () => {
 
         {alert.show && (
           <div
-            className={`z-50 py-2 px-4 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex items-center rounded-sm shadow-xl border-b-2 ${alert.bgColor} ${alert.borderColor} ${alert.textColor}`}
+            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-sm shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
           >
-            <IoAlertCircleOutline className="text-3xl" />
-            <p className=" font-bold text-xl ml-4">{alert.message}</p>
+            <div className="flex items-center px-4 mb-2">
+              <IoAlertCircleOutline className="text-3xl" />
+              <p className="font-bold text-xl ml-4 ">{alert.message}</p>
+            </div>
+
+            <div
+              className={`border-b-2 ${alert.borderColor} alert-progress`}
+            ></div>
           </div>
         )}
 
@@ -89,6 +96,7 @@ const App = () => {
             <Route path="/ckeditor" exact component={Ckeditor} />
             <Route path="/ckeditor/:id" exact component={Ckeditor} />
             <Route path="/ckeditorlist" exact component={CKList} />
+            <Route path="/form" exact component={AutoCompleteForm} />
             <Route component={_404} />
           </Switch>
         </div>

@@ -18,6 +18,9 @@ const initialState = {
   ckTableData: [],
   editMode: false,
   showModal: false,
+  page: 1,
+  limit: 5,
+  hasMore: true,
 };
 
 export const sendData = createAsyncThunk(
@@ -27,6 +30,8 @@ export const sendData = createAsyncThunk(
       const res = await axios.post("/ck", { data });
       if (res.status) {
         dispatch(setSuccessMessage(res.data.message));
+        // const id = res.data.data.insertId;
+        // dispatch(pushToCkTables({ id, data }));
         return res.data;
       }
     } catch (e) {
@@ -57,10 +62,21 @@ export const editData = createAsyncThunk(
 
 export const getData = createAsyncThunk(
   "ck/getData",
-  async (data, { dispatch, rejectWithValue }) => {
+  async ({ page, limit }, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.get("/ck");
+      const res = await axios.get("/ck", {
+        params: {
+          page: page,
+          limit: limit,
+        },
+      });
+
       if (res.status) {
+        const totalRecords = res.data.totalRecords;
+        const currentRecords = page * limit;
+        if (totalRecords > currentRecords) dispatch(setHasMore(true));
+        else dispatch(setHasMore(false));
+
         return res.data;
       }
     } catch (e) {
@@ -134,7 +150,15 @@ export const ckSlice = createSlice({
         (ck) => ck.id !== action.payload
       );
     },
-
+    // pushToCkTables: (state, action) => {
+    //   state.ckTableData.push(action.payload);
+    // },
+    claerTableRelatedData: (state, action) => {
+      state.ckTableData = [];
+      state.page = 1;
+      state.hasMore = true;
+      state.limit = 5;
+    },
     setEditMode: (state, action) => {
       state.editMode = action.payload;
     },
@@ -144,13 +168,22 @@ export const ckSlice = createSlice({
     clear: (state, action) => {
       state.ckInstances = initialState.ckInstances;
     },
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
+    setLimit: (state, action) => {
+      state.limit = action.payload;
+    },
+    setHasMore: (state, action) => {
+      state.hasMore = action.payload;
+    },
   },
   extraReducers: {
     [sendData.fulfilled]: (state, action) => {
       state.ckInstances = initialState.ckInstances;
     },
     [getData.fulfilled]: (state, action) => {
-      state.ckTableData = action.payload.data;
+      state.ckTableData = [...state.ckTableData, ...action.payload.data];
     },
     [getDataById.fulfilled]: (state, action) => {
       state.ckInstances = action.payload.data;
@@ -174,6 +207,11 @@ export const {
   setShowModal,
   setEditMode,
   clear,
+  setPage,
+  setLimit,
+  setHasMore,
+  pushToCkTables,
+  claerTableRelatedData,
 } = ckSlice.actions;
 
 export default ckSlice.reducer;
