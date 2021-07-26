@@ -7,11 +7,6 @@ import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 
 import Dashboard from "./Pages/Dashboard";
-import About from "./Pages/About";
-import Contactus from "./Pages/Contactus";
-import Profile from "./Pages/Profile";
-import Login from "./Pages/Login";
-import Signup from "./Pages/Signup";
 import _404 from "./Pages/_404";
 
 import Ckeditor from "./Pages/Ckeditor";
@@ -68,7 +63,7 @@ const App = () => {
 
         {alert.show && (
           <div
-            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-sm shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
+            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-t-xl shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
           >
             <div className="flex items-center px-4 mb-2">
               <IoAlertCircleOutline className="text-3xl" />
@@ -89,11 +84,7 @@ const App = () => {
         >
           <Switch>
             <Route path="/" exact component={Dashboard} />
-            <Route path="/about" exact component={About} />
-            <Route path="/contactus" exact component={Contactus} />
-            <Route path="/profile" exact component={Profile} />
-            <Route path="/login" exact component={Login} />
-            <Route path="/signup" exact component={Signup} />
+
             <Route path="/ckeditor" exact component={Ckeditor} />
             <Route path="/ckeditor/:id" exact component={Ckeditor} />
             <Route path="/ckeditorlist" exact component={CKList} />

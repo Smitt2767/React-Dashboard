@@ -21,6 +21,7 @@ const initialState = {
   page: 1,
   limit: 5,
   hasMore: true,
+  totalRecords: 0,
 };
 
 export const sendData = createAsyncThunk(
@@ -30,8 +31,6 @@ export const sendData = createAsyncThunk(
       const res = await axios.post("/ck", { data });
       if (res.status) {
         dispatch(setSuccessMessage(res.data.message));
-        // const id = res.data.data.insertId;
-        // dispatch(pushToCkTables({ id, data }));
         return res.data;
       }
     } catch (e) {
@@ -150,9 +149,7 @@ export const ckSlice = createSlice({
         (ck) => ck.id !== action.payload
       );
     },
-    // pushToCkTables: (state, action) => {
-    //   state.ckTableData.push(action.payload);
-    // },
+
     claerTableRelatedData: (state, action) => {
       state.ckTableData = [];
       state.page = 1;
@@ -184,6 +181,7 @@ export const ckSlice = createSlice({
     },
     [getData.fulfilled]: (state, action) => {
       state.ckTableData = [...state.ckTableData, ...action.payload.data];
+      state.totalRecords = action.payload.totalRecords;
     },
     [getDataById.fulfilled]: (state, action) => {
       state.ckInstances = action.payload.data;

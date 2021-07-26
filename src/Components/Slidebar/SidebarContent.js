@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { RiDashboardLine } from "react-icons/ri";
-import {
-  AiOutlineHome,
-  AiOutlineContacts,
-  AiOutlineClose,
-  AiOutlineForm,
-} from "react-icons/ai";
-import { BsPeople, BsPower, BsTerminal, BsPencilSquare } from "react-icons/bs";
+import { AiOutlineHome, AiOutlineClose, AiOutlineForm } from "react-icons/ai";
+import { BsPower, BsTerminal, BsPencilSquare } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
 import SidebarSubMenu from "./SidebarSubMenu";

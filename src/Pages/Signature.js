@@ -110,16 +110,17 @@ const Signature = () => {
           onChangeComplete={handleChange}
         />
         {fileName && (
-          <div className="bg-gray-700 text-gray-50 p-2 mt-4 rounded-full flex items-center justify-between">
+          <div className="bg-gray-700 text-gray-50 px-4 py-2 mt-4 rounded-full flex items-center justify-between">
             <a
               href={`${constants.API_URL}/${fileName}`}
               target="_blank"
               rel="noreferrer"
+              className="font-bold"
             >
               {fileName}
             </a>
             <AiOutlineClose
-              className="bg-gray-50 rounded-full p-1 ml-12 text-2xl text-gray-700 cursor-pointer"
+              className="bg-gray-50 rounded-full p-1 ml-12 text-2xl text-gray-700 cursor-pointer -mr-2"
               onClick={() => {
                 setFileName(null);
               }}
