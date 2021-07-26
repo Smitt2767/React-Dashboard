@@ -16,6 +16,7 @@ import _404 from "./Pages/_404";
 
 import Ckeditor from "./Pages/Ckeditor";
 import CKList from "./Pages/Ckeditor/CKList";
+import Signature from "./Pages/Signature";
 
 import { IoAlertCircleOutline } from "react-icons/io5";
 import AutoCompleteForm from "./Pages/AutoCompleteForm";
@@ -97,6 +98,7 @@ const App = () => {
             <Route path="/ckeditor/:id" exact component={Ckeditor} />
             <Route path="/ckeditorlist" exact component={CKList} />
             <Route path="/form" exact component={AutoCompleteForm} />
+            <Route path="/signature" exact component={Signature} />
             <Route component={_404} />
           </Switch>
         </div>

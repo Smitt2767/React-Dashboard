@@ -6,7 +6,7 @@ import {
   AiOutlineClose,
   AiOutlineForm,
 } from "react-icons/ai";
-import { BsPeople, BsPower, BsTerminal } from "react-icons/bs";
+import { BsPeople, BsPower, BsTerminal, BsPencilSquare } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
 import SidebarSubMenu from "./SidebarSubMenu";
@@ -32,6 +32,12 @@ const routes = [
       { id: 1, path: "/ckeditor", name: "Home" },
       { id: 2, path: "/ckeditorlist", name: "CKEditor data" },
     ],
+  },
+  {
+    id: 4,
+    name: "Signature",
+    icon: <BsPencilSquare className="text-2xl" />,
+    path: "/signature",
   },
 ];
 
