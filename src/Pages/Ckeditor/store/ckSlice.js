@@ -48,6 +48,7 @@ export const editData = createAsyncThunk(
       const res = await axios.put(`/ck/${data.id}`, { data: data.data });
       if (res.status) {
         dispatch(setSuccessMessage(res.data.message));
+        dispatch(updateCkTable(data));
         return res.data;
       }
     } catch (e) {
@@ -174,6 +175,13 @@ export const ckSlice = createSlice({
     setHasMore: (state, action) => {
       state.hasMore = action.payload;
     },
+    updateCkTable: (state, action) => {
+      state.ckTableData.forEach((data) => {
+        if (data.id === action.payload.id * 1) {
+          data.data = action.payload.data;
+        }
+      });
+    },
   },
   extraReducers: {
     [sendData.fulfilled]: (state, action) => {
@@ -188,6 +196,7 @@ export const ckSlice = createSlice({
     },
     [editData.fulfilled]: (state, action) => {
       state.ckInstances = initialState.ckInstances;
+
       state.editMode = false;
     },
     [sendData.rejected]: (state, action) => {},
@@ -210,6 +219,7 @@ export const {
   setHasMore,
   pushToCkTables,
   claerTableRelatedData,
+  updateCkTable,
 } = ckSlice.actions;
 
 export default ckSlice.reducer;

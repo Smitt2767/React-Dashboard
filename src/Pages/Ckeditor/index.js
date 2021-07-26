@@ -80,6 +80,7 @@ const Ckeditor = (props) => {
                 editData({ data: ckInstances, id: props.match.params.id })
               );
               dispatch(setEditMode(false));
+              props.history.push("/ckeditor");
             }}
             disabled={ckInstances.some((ck) => ck.data === "")}
           >

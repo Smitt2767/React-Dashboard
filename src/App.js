@@ -63,7 +63,7 @@ const App = () => {
 
         {alert.show && (
           <div
-            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-t-xl shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
+            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-full overflow-hidden shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
           >
             <div className="flex items-center px-4 mb-2">
               <IoAlertCircleOutline className="text-3xl" />
