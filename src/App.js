@@ -14,6 +14,9 @@ import CKList from "./Pages/Ckeditor/CKList";
 import Signature from "./Pages/Signature";
 import { IoAlertCircleOutline } from "react-icons/io5";
 import AutoCompleteForm from "./Pages/AutoCompleteForm";
+import Chat from "./Pages/Chat";
+
+import { connectWithWebSocket } from "./services/socket";
 
 const App = () => {
   const [openMenu, setOpenMenu] = useState(false);
@@ -21,6 +24,10 @@ const App = () => {
     (state) => state.dashboard
   );
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    connectWithWebSocket();
+  }, []);
 
   useEffect(() => {
     let id;
@@ -89,6 +96,7 @@ const App = () => {
             <Route path="/ckeditorlist" exact component={CKList} />
             <Route path="/form" exact component={AutoCompleteForm} />
             <Route path="/signature" exact component={Signature} />
+            <Route path="/chat" exact component={Chat} />
             <Route component={_404} />
           </Switch>
         </div>

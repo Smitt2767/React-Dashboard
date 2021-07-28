@@ -1,8 +1,10 @@
 import React from "react";
 import { BsSearch, BsBell } from "react-icons/bs";
 import { AiOutlineMenu } from "react-icons/ai";
+import { useSelector } from "react-redux";
 
 const DesktopHeader = ({ openMenu, setOpenMenu }) => {
+  const { username } = useSelector((state) => state.chat);
   return (
     <div className=" h-full flex items-center justify-between px-2 lg:px-8">
       <div
@@ -30,7 +32,9 @@ const DesktopHeader = ({ openMenu, setOpenMenu }) => {
           <div className="absolute rounded-full h-2 w-2 top-0 right-0 bg-blue-400"></div>
         </div>
         <div className="w-10 h-10 text-white bg-blue-600 rounded-full flex justify-center items-center cursor-pointer hover:bg-blue-700">
-          <span className="font-bold text-2xl">S</span>
+          <span className="font-bold text-2xl">
+            {username ? username[0].toUpperCase() : "A"}
+          </span>
         </div>
       </div>
     </div>

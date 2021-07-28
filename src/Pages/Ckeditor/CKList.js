@@ -28,6 +28,23 @@ const CKList = (props) => {
   const [tableHeight, setTableHeight] = useState(0);
   const outerDiv = React.useRef(null);
 
+  const columns = useMemo(
+    () => [
+      { Header: "Id", accessor: "id", width: 40 },
+      {
+        Header: "Data",
+        accessor: "data",
+      },
+      {
+        Header: "Actions",
+        accessor: "actions",
+        Footer: `Total Records - ${totalRecords}`,
+        width: 100,
+      },
+    ],
+    [totalRecords]
+  );
+
   useEffect(() => {
     if (outerDiv && outerDiv.current)
       setTableHeight(outerDiv.current.offsetHeight);
@@ -42,6 +59,7 @@ const CKList = (props) => {
   }, [dispatch, page, limit]);
 
   const next = () => {
+    console.log("hiiii");
     dispatch(setPage(page + 1));
   };
 
@@ -121,43 +139,43 @@ const CKList = (props) => {
     const getData = (cell) => {
       if (cell.column.id === "id") {
         return (
-          <div
+          <td
             key={cell.column.id}
             className="td text-gray-700 flex items-center justify-center p-2"
             {...cell.getCellProps()}
           >
             {cell.render("Cell")}
-          </div>
+          </td>
         );
       } else if (cell.column.id === "data") {
         return (
-          <div
+          <td
             key={cell.column.id}
             className="td text-gray-700 p-2"
             {...cell.getCellProps()}
           >
             {innerTable(cell.value)}
-          </div>
+          </td>
         );
       } else if (cell.column.id === "actions") {
         return (
-          <div
+          <td
             key={cell.column.id}
             className="td text-gray-700 flex items-center justify-center p-2"
             {...cell.getCellProps()}
           >
             {actionButtons(cell.row.values.id)}
-          </div>
+          </td>
         );
       } else {
         return (
-          <div
+          <td
             key={cell.column.id}
             className="td text-gray-700 flex items-center justify-center"
             {...cell.getCellProps()}
           >
             Setup First
-          </div>
+          </td>
         );
       }
     };
@@ -186,7 +204,7 @@ const CKList = (props) => {
         }),
       });
 
-      const [{ isDragging }, drag, preview] = useDrag({
+      const [{ isDragging }, drag] = useDrag({
         item: { id: header.id },
         type: THEAD,
         collect: (monitor) => ({
@@ -198,10 +216,10 @@ const CKList = (props) => {
       drop(dragRef);
 
       return (
-        <div
-          className={`th text-center text-xl p-2  text-gray-50 ${
+        <th
+          className={`th text-center text-xl p-2  text-gray-50  ${
             isDragging ? "bg-gray-600 opacity-70" : "bg-gray-700"
-          } ${isOver ? "border-b-4 border-pink-400" : ""}`}
+          } ${isOver ? "border-b-4 border-pink-400" : ""} sticky top-0`}
           key={header.id}
           {...header.getHeaderProps()}
           ref={dropRef}
@@ -213,18 +231,23 @@ const CKList = (props) => {
               className={`resizer ${header.isResizing ? "isResizing" : ""}`}
             />
           )}
-        </div>
+        </th>
       );
     };
 
     return (
-      <>
+      <InfiniteScroll
+        dataLength={rows.length}
+        next={next}
+        hasMore={hasMore}
+        scrollableTarget="scroll"
+      >
         <DndProvider backend={HTML5Backend}>
-          <div {...getTableProps()} className="table w-full ">
-            <div className="thead">
+          <table {...getTableProps()} className="table w-full relative">
+            <thead className="thead">
               {headerGroups.map((headerGroup, i) => {
                 return (
-                  <div
+                  <tr
                     key={i}
                     {...headerGroup.getHeaderGroupProps()}
                     className="tr"
@@ -236,55 +259,38 @@ const CKList = (props) => {
                         </React.Fragment>
                       );
                     })}
-                  </div>
+                  </tr>
                 );
               })}
-            </div>
+            </thead>
 
-            <div className="tbody bg-gray-200">
+            <tbody className="tbody bg-gray-200">
               {rows.map((row) => {
                 prepareRow(row);
                 return (
-                  <div key={row.id} {...row.getRowProps()} className="tr">
+                  <tr key={row.id} {...row.getRowProps()} className="tr">
                     {row.cells.map((cell) => getData(cell))}
-                  </div>
+                  </tr>
                 );
               })}
-            </div>
-            <div className="tfoot">
+            </tbody>
+            <tfoot className="tfoot">
               {footerGroups.map((group) => (
-                <div {...group.getFooterGroupProps()} className="tr">
-                  <div
+                <tr {...group.getFooterGroupProps()} className="tr">
+                  <td
                     {...group.headers[2].getFooterProps()}
                     className="td text-center text-lg p-2 bg-gray-700 text-gray-400"
                   >
                     {group.headers[2].render("Footer")}
-                  </div>
-                </div>
+                  </td>
+                </tr>
               ))}
-            </div>
-          </div>
+            </tfoot>
+          </table>
         </DndProvider>
-      </>
+      </InfiniteScroll>
     );
   };
-
-  const columns = useMemo(
-    () => [
-      { Header: "Id", accessor: "id", width: 40 },
-      {
-        Header: "Data",
-        accessor: "data",
-      },
-      {
-        Header: "Actions",
-        accessor: "actions",
-        Footer: `Total Records - ${totalRecords}`,
-        width: 100,
-      },
-    ],
-    [totalRecords]
-  );
 
   return (
     <div className="w-full h-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-hidden">
@@ -298,19 +304,14 @@ const CKList = (props) => {
           handleYesBtnClicked={handleYesBtnClicked}
         />
       )}
-      <div
-        className="w-full h-full overflow-auto "
-        id="scrollableDiv"
-        ref={outerDiv}
-      >
-        <InfiniteScroll
-          dataLength={ckTableData.length}
-          next={next}
-          hasMore={hasMore}
-          scrollableTarget="scrollableDiv"
+      <div className="w-full h-full overflow-hidden" ref={outerDiv}>
+        <div
+          className=" overflow-y-auto relative"
+          style={{ height: tableHeight }}
+          id="scroll"
         >
           <Table columns={columns} data={ckTableData} />
-        </InfiniteScroll>
+        </div>
       </div>
     </div>
   );
