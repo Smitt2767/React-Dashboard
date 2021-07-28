@@ -150,12 +150,12 @@ export const ckSlice = createSlice({
         (ck) => ck.id !== action.payload
       );
     },
-
-    claerTableRelatedData: (state, action) => {
+    clearTableRelatedData: (state, action) => {
       state.ckTableData = [];
       state.page = 1;
       state.hasMore = true;
       state.limit = 5;
+      state.totalRecords = 0;
     },
     setEditMode: (state, action) => {
       state.editMode = action.payload;
@@ -218,7 +218,7 @@ export const {
   setLimit,
   setHasMore,
   pushToCkTables,
-  claerTableRelatedData,
+  clearTableRelatedData,
   updateCkTable,
 } = ckSlice.actions;
 

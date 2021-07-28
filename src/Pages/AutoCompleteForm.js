@@ -77,12 +77,12 @@ const AutoCompleteForm = () => {
   ));
 
   return (
-    <div className="w-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-y-auto">
+    <div className="w-full py-4 px-4 md:px-8 flex items-start flex-col overflow-y-auto">
       <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer mb-8">
         Autocomplete Form
       </h1>
       <div className="flex items-center justify-center w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-10 border-2 border-gray-100 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4 lg:p-10 border-2 border-gray-100 rounded-lg">
           <div className="flex flex-col bg-gray-50 px-5 py-4 shadow-xl w-full md:w-96 max-w-xl">
             <h1 className="font-bold text-3xl text-center mb-8">
               Autocomplete Form
@@ -164,11 +164,12 @@ const AutoCompleteForm = () => {
               className="my-3 h-12 px-5 focus:outline-none border-2 border-gray-400 rounded-lg"
             />
             <div className="flex justify-between items-center mt-8">
-              <button className="bg-blue-500 focus:outline-none border-none rounded-lg text-white px-12 py-2 font-bold">
+              <button className="bg-blue-600 text-gray-50 px-5 md:px-10 py-1 font-bold text-xl shadow-lg hover:bg-blue-800 rounded-lg">
                 Submit
               </button>
+
               <button
-                className="bg-red-500 focus:outline-none border-none rounded-lg text-white px-12 py-2 font-bold"
+                className="bg-green-600 text-gray-50 px-5 md:px-10 py-1 font-bold text-xl shadow-lg hover:bg-green-800 rounded-lg"
                 onClick={clear}
               >
                 Clear

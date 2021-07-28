@@ -1,26 +1,47 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getData, deleteData, setShowModal, setPage } from "./store/ckSlice";
+import {
+  getData,
+  deleteData,
+  setShowModal,
+  setPage,
+  clearTableRelatedData,
+} from "./store/ckSlice";
 import { BsPencil, BsTrash } from "react-icons/bs";
 import Alert from "../../Components/Modal/Alert";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useTable, useResizeColumns, useFlexLayout } from "react-table";
+import {
+  useTable,
+  useResizeColumns,
+  useFlexLayout,
+  useColumnOrder,
+} from "react-table";
+
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const CKList = (props) => {
   const { ckTableData, showModal, page, limit, hasMore, totalRecords } =
     useSelector((state) => state.ck);
   const dispatch = useDispatch();
   const [id, setId] = useState(null);
+  const [tableHeight, setTableHeight] = useState(0);
+  const outerDiv = React.useRef(null);
 
   useEffect(() => {
-    if (page === 1) {
-      dispatch(getData({ page, limit }));
-      dispatch(setPage(page + 1));
-    }
+    if (outerDiv && outerDiv.current)
+      setTableHeight(outerDiv.current.offsetHeight);
+
+    return () => {
+      dispatch(clearTableRelatedData());
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getData({ page, limit }));
   }, [dispatch, page, limit]);
 
   const next = () => {
-    dispatch(getData({ page, limit }));
     dispatch(setPage(page + 1));
   };
 
@@ -83,13 +104,20 @@ const CKList = (props) => {
       []
     );
 
-    const { getTableProps, headerGroups, rows, prepareRow, footerGroups } =
-      useTable(
-        { columns, data, defaultColumn },
-        useResizeColumns,
-        useFlexLayout
-      );
-
+    const {
+      getTableProps,
+      headerGroups,
+      rows,
+      prepareRow,
+      footerGroups,
+      setColumnOrder,
+      visibleColumns,
+    } = useTable(
+      { columns, data, defaultColumn },
+      useResizeColumns,
+      useFlexLayout,
+      useColumnOrder
+    );
     const getData = (cell) => {
       if (cell.column.id === "id") {
         return (
@@ -133,85 +161,111 @@ const CKList = (props) => {
         );
       }
     };
+    const THEAD = "THEAD";
+
+    const Header = ({ header }) => {
+      const dropRef = React.useRef(null);
+      const dragRef = React.useRef(null);
+
+      const [{ isOver }, drop] = useDrop({
+        accept: THEAD,
+        drop: (item, monitor) => {
+          const currentItems = [...visibleColumns.map(({ id }) => id)];
+
+          const dragIndex = currentItems.indexOf(item.id);
+          const dropIndex = currentItems.indexOf(header.id);
+
+          let temp = currentItems[dragIndex];
+          currentItems[dragIndex] = currentItems[dropIndex];
+          currentItems[dropIndex] = temp;
+
+          setColumnOrder(currentItems);
+        },
+        collect: (monitor) => ({
+          isOver: !!monitor.isOver(),
+        }),
+      });
+
+      const [{ isDragging }, drag, preview] = useDrag({
+        item: { id: header.id },
+        type: THEAD,
+        collect: (monitor) => ({
+          isDragging: monitor.isDragging(),
+        }),
+      });
+
+      drag(dragRef);
+      drop(dragRef);
+
+      return (
+        <div
+          className={`th text-center text-xl p-2  text-gray-50 ${
+            isDragging ? "bg-gray-600 opacity-70" : "bg-gray-700"
+          } ${isOver ? "border-b-4 border-pink-400" : ""}`}
+          key={header.id}
+          {...header.getHeaderProps()}
+          ref={dropRef}
+        >
+          <div ref={dragRef}>{header.render("Header")}</div>
+          {header.canResize && (
+            <div
+              {...header.getResizerProps()}
+              className={`resizer ${header.isResizing ? "isResizing" : ""}`}
+            />
+          )}
+        </div>
+      );
+    };
 
     return (
-      <div
-        {...getTableProps()}
-        className="table w-full overflow-x-auto overflow-y-auto"
-      >
-        <div className="thead">
-          {headerGroups.map((headerGroup, i) => {
-            return (
-              <div
-                key={i}
-                {...headerGroup.getHeaderGroupProps()}
-                className="tr"
-              >
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <div
-                      className="th text-center text-xl p-2 bg-gray-700 text-gray-50"
-                      key={header.id}
-                      {...header.getHeaderProps()}
-                    >
-                      {header.render("Header")}
-                      {header.canResize && (
-                        <div
-                          {...header.getResizerProps()}
-                          className={`resizer ${
-                            header.isResizing ? "isResizing" : ""
-                          }`}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-
-        <div
-          className="tbody bg-gray-200 h-full overflow-y-auto overflow-x-auto"
-          id="scrollableDiv"
-        >
-          <InfiniteScroll
-            dataLength={rows.length}
-            next={next}
-            scrollableTarget="scrollableDiv"
-            hasMore={hasMore}
-          >
-            {rows.map((row) => {
-              prepareRow(row);
-              return (
-                <div key={row.id} {...row.getRowProps()} className="tr">
-                  {row.cells.map((cell) => getData(cell))}
-                </div>
-              );
-            })}
-          </InfiniteScroll>
-        </div>
-        <div className="tfoot">
-          {footerGroups.map((group) => (
-            <div {...group.getFooterGroupProps()} className="tr">
-              {/* {group.headers.map((column) => (
-                <div
-                  {...column.getFooterProps()}
-                  className="td text-center text-lg p-2 bg-gray-700 text-gray-400"
-                >
-                  {column.render("Footer")}
-                </div>
-              ))} */}
-              <div
-                {...group.headers[2].getFooterProps()}
-                className="td text-center text-lg p-2 bg-gray-700 text-gray-400"
-              >
-                {group.headers[2].render("Footer")}
-              </div>
+      <>
+        <DndProvider backend={HTML5Backend}>
+          <div {...getTableProps()} className="table w-full ">
+            <div className="thead">
+              {headerGroups.map((headerGroup, i) => {
+                return (
+                  <div
+                    key={i}
+                    {...headerGroup.getHeaderGroupProps()}
+                    className="tr"
+                  >
+                    {headerGroup.headers.map((header, i) => {
+                      return (
+                        <React.Fragment key={header.id}>
+                          <Header header={header} index={i} />
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      </div>
+
+            <div className="tbody bg-gray-200">
+              {rows.map((row) => {
+                prepareRow(row);
+                return (
+                  <div key={row.id} {...row.getRowProps()} className="tr">
+                    {row.cells.map((cell) => getData(cell))}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="tfoot">
+              {footerGroups.map((group) => (
+                <div {...group.getFooterGroupProps()} className="tr">
+                  <div
+                    {...group.headers[2].getFooterProps()}
+                    className="td text-center text-lg p-2 bg-gray-700 text-gray-400"
+                  >
+                    {group.headers[2].render("Footer")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DndProvider>
+      </>
     );
   };
 
@@ -244,8 +298,20 @@ const CKList = (props) => {
           handleYesBtnClicked={handleYesBtnClicked}
         />
       )}
-
-      <Table columns={columns} data={ckTableData} />
+      <div
+        className="w-full h-full overflow-auto "
+        id="scrollableDiv"
+        ref={outerDiv}
+      >
+        <InfiniteScroll
+          dataLength={ckTableData.length}
+          next={next}
+          hasMore={hasMore}
+          scrollableTarget="scrollableDiv"
+        >
+          <Table columns={columns} data={ckTableData} />
+        </InfiniteScroll>
+      </div>
     </div>
   );
 };
