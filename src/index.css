@@ -72,3 +72,19 @@
 .thead .tr .th .resizer.isResizing {
   background: rgba(248, 113, 113);
 }
+
+/* Emoji */
+.emoji-picker-react input.emoji-search {
+  color: rgba(55, 65, 81);
+}
+.emoji-picker-react
+  .active-category-indicator-wrapper
+  .active-category-indicator {
+  opacity: 0.8 !important;
+}
+
+@media (min-width: 768px) {
+  .emoji-picker-react {
+    width: 80%;
+  }
+}

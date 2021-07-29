@@ -13,10 +13,12 @@ const Form = ({ handleSubmit, setShowModal }) => {
       >
         <div className={`relative w-auto my-6 mx-auto max-w-3xl px-8 md:px-0 `}>
           {/*content*/}
-          <div className="border-0 rounded-md shadow-lg relative flex flex-col w-full bg-gray-100 outline-none focus:outline-none px-12 py-8">
+          <div className="border-0 rounded-md shadow-lg relative flex flex-col w-full bg-gray-100 outline-none focus:outline-none px-8 md:px-12 py-4 md:py-8">
             {/*body*/}
-            <div className="flex flex-col items-center w-96 ">
-              <h1 className="text-4xl text-gray-700 mb-8">Username</h1>
+            <div className="flex flex-col items-center w-60 md:w-96">
+              <h1 className="text-4xl text-gray-700 mb-8 font-bold">
+                Username
+              </h1>
               <input
                 className="w-full focus:outline-none bg-transparent border-b-2 border-gray-700 p-2 mb-8"
                 placeholder="Enter your username..."

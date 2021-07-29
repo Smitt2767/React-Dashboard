@@ -6,6 +6,7 @@ const initialState = {
   socketId: null,
   showModal: false,
   typer: "",
+  activeUsers: [],
 };
 
 export const chatSlice = createSlice({
@@ -32,10 +33,21 @@ export const chatSlice = createSlice({
     setTyper: (state, action) => {
       state.typer = action.payload;
     },
+    setActiveUsers: (state, action) => {
+      state.activeUsers = [
+        ...action.payload.filter((user) => user.id !== state.socketId),
+      ];
+    },
   },
 });
 
-export const { setUsername, setSocketId, setShowModal, addMessage, setTyper } =
-  chatSlice.actions;
+export const {
+  setUsername,
+  setSocketId,
+  setShowModal,
+  addMessage,
+  setTyper,
+  setActiveUsers,
+} = chatSlice.actions;
 
 export default chatSlice.reducer;

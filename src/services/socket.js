@@ -5,6 +5,7 @@ import {
   setSocketId,
   addMessage,
   setTyper,
+  setActiveUsers,
 } from "../Pages/Chat/store/chatSlice";
 let socket;
 
@@ -29,6 +30,16 @@ export const connectWithWebSocket = () => {
 
   socket.on("typing", (data) => {
     store.dispatch(setTyper(data));
+  });
+
+  socket.on("broadcast", (data) => {
+    switch (data.type) {
+      case "USERS":
+        store.dispatch(setActiveUsers(data.users));
+        break;
+      default:
+        break;
+    }
   });
 };
 
