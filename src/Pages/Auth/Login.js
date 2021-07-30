@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, Redirect } from "react-router-dom";
-import axios from "axios";
 import { authenticate } from "../../services/jwtService";
 import { useSelector } from "react-redux";
+import API from "../../services/api";
 
 const Login = (props) => {
   const { isAuth } = useSelector((state) => state.auth);
@@ -35,7 +35,7 @@ const Login = (props) => {
 
   const onSubmit = async () => {
     try {
-      const res = await axios.post("/auth/login", {
+      const res = await API.post("/auth/login", {
         email: user.email,
         password: user.password,
       });
@@ -47,9 +47,8 @@ const Login = (props) => {
         authenticate(
           { token: res.data.data.token, user: res.data.data.user },
           () => {
-            axios.defaults.headers.common["Authorization"] =
+            API.defaults.headers.common["Authorization"] =
               "Bearer " + res.data.data.token;
-            console.log(axios.defaults);
             props.history.push("/");
           }
         );

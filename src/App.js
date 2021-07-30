@@ -27,9 +27,7 @@ import Login from "./Pages/Auth/Login";
 import { connectWithWebSocket, joinChatRoom } from "./services/socket";
 import { getDataFromLocalStorage } from "./services/jwtService";
 
-import constants from "./constants";
-import axios from "axios";
-axios.defaults.baseURL = constants.API_URL;
+import API from "./services/api";
 
 const App = () => {
   const [openMenu, setOpenMenu] = useState(false);
@@ -38,6 +36,11 @@ const App = () => {
   );
   const { isAuth, username } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+
+  if (localStorage.getItem("token")) {
+    API.defaults.headers.common["Authorization"] =
+      "Bearer " + JSON.parse(localStorage.getItem("token"));
+  }
 
   useEffect(() => {
     const user = getDataFromLocalStorage();

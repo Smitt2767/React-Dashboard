@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Redirect } from "react-router-dom";
-import axios from "axios";
 import { useSelector } from "react-redux";
+import API from "../../services/api";
 
 const SignUp = () => {
   const [user, setUser] = useState({
@@ -34,7 +34,7 @@ const SignUp = () => {
 
   const onSubmit = async () => {
     try {
-      const res = await axios.post("/auth/signup", {
+      const res = await API.post("/auth/signup", {
         username: user.username,
         email: user.email,
         password: user.password,
