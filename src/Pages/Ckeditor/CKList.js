@@ -267,7 +267,6 @@ const CKList = (props) => {
             <tbody className="tbody bg-gray-200">
               {rows.map((row) => {
                 prepareRow(row);
-                console.log(row);
                 return (
                   <tr key={row.id} {...row.getRowProps()} className="tr">
                     {row.cells.map((cell) => getData(cell))}

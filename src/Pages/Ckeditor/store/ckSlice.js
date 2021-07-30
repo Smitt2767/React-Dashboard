@@ -79,7 +79,6 @@ export const getData = createAsyncThunk(
         return res.data;
       }
     } catch (e) {
-      console.dir(e);
       if (e.response?.data) {
         dispatch(setErrorMessage(e.response?.data.message));
       }

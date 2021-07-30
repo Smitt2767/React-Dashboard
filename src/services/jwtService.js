@@ -1,15 +1,16 @@
 import store from "../store";
 import { setAuthData, resetAuthData } from "../Pages/Auth/store/authSlice";
 import { resetChatData } from "../Pages/Chat/store/chatSlice";
+import API from "./api";
 
-export const removeLocalStorage = (cb) => {
+export const logout = () => {
   if (window) {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
   }
+  API.defaults.headers.common["Authorization"] = "";
   store.dispatch(resetAuthData());
   store.dispatch(resetChatData());
-  cb();
 };
 
 export const setLocalStorage = (key, value) => {

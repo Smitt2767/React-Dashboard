@@ -3,7 +3,7 @@ import { Link, Redirect } from "react-router-dom";
 import { useSelector } from "react-redux";
 import API from "../../services/api";
 
-const SignUp = () => {
+const SignUp = (props) => {
   const [user, setUser] = useState({
     username: "",
     email: "",
@@ -57,7 +57,7 @@ const SignUp = () => {
   return (
     <>
       {isAuth ? (
-        <Redirect to="/" />
+        <Redirect to={props.location.state.from.pathname} />
       ) : (
         <div className="h-screen w-full p-5 flex justify-center items-center bg-gray-700">
           <form

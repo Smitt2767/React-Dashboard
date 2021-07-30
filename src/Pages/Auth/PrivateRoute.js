@@ -1,17 +1,19 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import { getDataFromLocalStorage } from "../../services/jwtService";
+import { useSelector } from "react-redux";
+
 const PrivateRoute = ({
   component: Component,
   openMenu,
   setOpenMenu,
   ...rest
 }) => {
+  const { isAuth } = useSelector((state) => state.auth);
   return (
     <Route
       {...rest}
       render={(props) => {
-        return getDataFromLocalStorage() ? (
+        return isAuth ? (
           <div
             className="w-full h-full pl-0 lg:pl-64 pt-16 pb-8"
             onClick={() => {
