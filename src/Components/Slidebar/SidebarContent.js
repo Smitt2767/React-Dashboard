@@ -7,10 +7,11 @@ import {
   BsPencilSquare,
   BsChatDots,
 } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
 import SidebarSubMenu from "./SidebarSubMenu";
-
+import { removeLocalStorage } from "../../services/jwtService";
+import { leaveChatRoom } from "../../services/socket";
 const routes = [
   {
     id: 1,
@@ -41,13 +42,14 @@ const routes = [
   },
   {
     id: 5,
-    name: "Chat",
+    name: "Global Chat",
     icon: <BsChatDots className="text-2xl" />,
-    path: "/chat",
+    path: "/globalChat",
   },
 ];
 
 const SidebarContent = ({ openMenu, setOpenMenu }) => {
+  const history = useHistory();
   const [active, setActive] = useState(
     routes.find((route) => {
       if (route.routes?.length) {
@@ -158,10 +160,12 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
         })}
       </div>
       <div className="flex-none h-40 flex items-center text-4xl justify-center">
-        <Link
-          to="/"
+        <button
           onClick={() => {
-            setActive(1);
+            removeLocalStorage(() => {
+              leaveChatRoom();
+              history.push("/login");
+            });
           }}
           className="bg-red-500 p-2 rounded-full hover:bg-red-600 text-gray-800 hover:text-gray-50"
         >
@@ -173,7 +177,7 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
               }
             }}
           />
-        </Link>
+        </button>
       </div>
     </div>
   );

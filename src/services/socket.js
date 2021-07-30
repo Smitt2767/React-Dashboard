@@ -54,3 +54,7 @@ export const sendMessage = (data) => {
 export const sendTypingData = (data) => {
   socket.emit("typing", data);
 };
+
+export const leaveChatRoom = () => {
+  socket.emit("leaveChatRoom");
+};

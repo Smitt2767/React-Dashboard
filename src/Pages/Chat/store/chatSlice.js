@@ -1,10 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import moment from "moment";
 const initialState = {
-  username: null,
   messages: [],
   socketId: null,
-  showModal: false,
   typer: "",
   activeUsers: [],
 };
@@ -13,14 +11,8 @@ export const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    setUsername: (state, action) => {
-      state.username = action.payload;
-    },
     setSocketId: (state, action) => {
       state.socketId = action.payload;
-    },
-    setShowModal: (state, action) => {
-      state.showModal = action.payload;
     },
     addMessage: (state, action) => {
       state.messages.push({
@@ -38,16 +30,20 @@ export const chatSlice = createSlice({
         ...action.payload.filter((user) => user.id !== state.socketId),
       ];
     },
+    resetChatData: (state, action) => {
+      state.messages = initialState.messages;
+      state.activeUsers = initialState.activeUsers;
+      state.typer = initialState.typer;
+    },
   },
 });
 
 export const {
-  setUsername,
   setSocketId,
-  setShowModal,
   addMessage,
   setTyper,
   setActiveUsers,
+  resetChatData,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -30,7 +30,7 @@ const CKList = (props) => {
 
   const columns = useMemo(
     () => [
-      { Header: "Id", accessor: "id", width: 40 },
+      { Header: "Id", accessor: "ck_id", width: 40 },
       {
         Header: "Data",
         accessor: "data",
@@ -137,7 +137,7 @@ const CKList = (props) => {
       useColumnOrder
     );
     const getData = (cell) => {
-      if (cell.column.id === "id") {
+      if (cell.column.id === "ck_id") {
         return (
           <td
             key={cell.column.id}
@@ -164,7 +164,7 @@ const CKList = (props) => {
             className="td text-gray-700 flex items-center justify-center p-2"
             {...cell.getCellProps()}
           >
-            {actionButtons(cell.row.values.id)}
+            {actionButtons(cell.row.values.ck_id)}
           </td>
         );
       } else {
@@ -267,6 +267,7 @@ const CKList = (props) => {
             <tbody className="tbody bg-gray-200">
               {rows.map((row) => {
                 prepareRow(row);
+                console.log(row);
                 return (
                   <tr key={row.id} {...row.getRowProps()} className="tr">
                     {row.cells.map((cell) => getData(cell))}

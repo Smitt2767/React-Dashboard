@@ -1,33 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  setUsername,
-  setShowModal,
-  addMessage,
-  setTyper,
-} from "./store/chatSlice";
-import Form from "../../Components/Modal/Form";
-import {
-  joinChatRoom,
-  sendMessage,
-  sendTypingData,
-} from "../../services/socket";
+import { addMessage, setTyper } from "./store/chatSlice";
+import { sendMessage, sendTypingData } from "../../services/socket";
 import { IoIosSend } from "react-icons/io";
 import Picker from "emoji-picker-react";
 import { GrEmoji } from "react-icons/gr";
-import { AiOutlineCamera } from "react-icons/ai";
 import { FiUsers } from "react-icons/fi";
 
 const Chat = () => {
-  const { showModal, username, messages, typer, activeUsers } = useSelector(
-    (state) => state.chat
-  );
+  const { messages, typer, activeUsers } = useSelector((state) => state.chat);
+  const { username } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const messageDivRef = useRef();
-  const imageRef = useRef();
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [images, setImages] = useState([]);
   const [showUsers, setShowUsers] = useState(false);
 
   const handleMessageSend = () => {
@@ -37,14 +23,6 @@ const Chat = () => {
     if (showEmojiPicker) setShowEmojiPicker(false);
     setMessage("");
   };
-
-  useEffect(() => {
-    console.log(images);
-  }, [images]);
-
-  useEffect(() => {
-    if (!username) dispatch(setShowModal(true));
-  }, [username, dispatch]);
 
   useEffect(() => {
     if (username && message) sendTypingData(username);
@@ -66,25 +44,8 @@ const Chat = () => {
     };
   }, [typer, dispatch]);
 
-  const handleSubmit = (value) => {
-    dispatch(setUsername(value));
-    joinChatRoom(value);
-  };
-
-  const handleShowModal = (value) => {
-    dispatch(setShowModal(value));
-  };
-
   const handleUsersButtonClick = () => {
     setShowUsers(!showUsers);
-  };
-
-  const handleCameraButtonClick = () => {
-    imageRef.current.click();
-  };
-
-  const handleImageChange = (e) => {
-    console.log(URL.createObjectURL(e.target.files[0]));
   };
 
   const LeftMessage = ({ message, at, by }) => {
@@ -118,10 +79,6 @@ const Chat = () => {
 
   return (
     <div className="w-full h-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-hidden">
-      {showModal && (
-        <Form setShowModal={handleShowModal} handleSubmit={handleSubmit} />
-      )}
-
       {username && (
         <div className="h-full mx-auto w-full max-w-4xl overflow-hidden flex flex-col items-center rounded-lg shadow-xl">
           <div className="w-full bg-gray-700 px-4 lg:px-8 py-1 lg:py-2 text-xl lg:text-2xl text-gray-50 flex-none flex justify-between overflow-visible relative">

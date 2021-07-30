@@ -4,7 +4,7 @@ import { AiOutlineMenu } from "react-icons/ai";
 import { useSelector } from "react-redux";
 
 const DesktopHeader = ({ openMenu, setOpenMenu }) => {
-  const { username } = useSelector((state) => state.chat);
+  const { username } = useSelector((state) => state.auth);
   return (
     <div className=" h-full flex items-center justify-between px-2 lg:px-8">
       <div

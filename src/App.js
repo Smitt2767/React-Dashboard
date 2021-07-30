@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import PrivateRoute from "./Pages/Auth/PrivateRoute";
+
 import { useSelector, useDispatch } from "react-redux";
 import { setErrorMessage, setSuccessMessage } from "./store/dashboardSlice";
+import { setAuthData } from "./Pages/Auth/store/authSlice";
+
+import { IoAlertCircleOutline } from "react-icons/io5";
+
 import Sidebar from "./Components/Slidebar";
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
@@ -12,22 +18,48 @@ import _404 from "./Pages/_404";
 import Ckeditor from "./Pages/Ckeditor";
 import CKList from "./Pages/Ckeditor/CKList";
 import Signature from "./Pages/Signature";
-import { IoAlertCircleOutline } from "react-icons/io5";
+
 import AutoCompleteForm from "./Pages/AutoCompleteForm";
 import Chat from "./Pages/Chat";
+import Signup from "./Pages/Auth/SignUp";
+import Login from "./Pages/Auth/Login";
 
-import { connectWithWebSocket } from "./services/socket";
+import { connectWithWebSocket, joinChatRoom } from "./services/socket";
+import { getDataFromLocalStorage } from "./services/jwtService";
+
+import constants from "./constants";
+import axios from "axios";
+axios.defaults.baseURL = constants.API_URL;
 
 const App = () => {
   const [openMenu, setOpenMenu] = useState(false);
   const { successMessage, errorMessage } = useSelector(
     (state) => state.dashboard
   );
+  const { isAuth, username } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const user = getDataFromLocalStorage();
+
+    if (user) {
+      dispatch(
+        setAuthData({
+          username: user.username,
+          email: user.email,
+          isAuth: !!user,
+        })
+      );
+    }
+
     connectWithWebSocket();
-  }, []);
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isAuth && username) {
+      joinChatRoom(username);
+    }
+  }, [username, isAuth]);
 
   useEffect(() => {
     let id;
@@ -63,10 +95,6 @@ const App = () => {
   return (
     <div className="h-screen relative">
       <Router>
-        <Sidebar openMenu={openMenu} setOpenMenu={setOpenMenu} />
-        <Header openMenu={openMenu} setOpenMenu={setOpenMenu} />
-        <Footer />
-
         {alert.show && (
           <div
             className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-full overflow-hidden shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
@@ -82,24 +110,68 @@ const App = () => {
           </div>
         )}
 
-        <div
-          className="w-full h-full pl-0 lg:pl-64 pt-16 pb-8 overflow-y-auto"
-          onClick={() => {
-            if (openMenu) setOpenMenu(false);
-          }}
-        >
-          <Switch>
-            <Route path="/" exact component={Dashboard} />
+        {isAuth && (
+          <>
+            <Sidebar openMenu={openMenu} setOpenMenu={setOpenMenu} />
+            <Header openMenu={openMenu} setOpenMenu={setOpenMenu} />
+            <Footer />
+          </>
+        )}
 
-            <Route path="/ckeditor" exact component={Ckeditor} />
-            <Route path="/ckeditor/:id" exact component={Ckeditor} />
-            <Route path="/ckeditorlist" exact component={CKList} />
-            <Route path="/form" exact component={AutoCompleteForm} />
-            <Route path="/signature" exact component={Signature} />
-            <Route path="/chat" exact component={Chat} />
-            <Route component={_404} />
-          </Switch>
-        </div>
+        <Switch>
+          <Route path="/signup" exact component={Signup} />
+          <Route path="/login" exact component={Login} />
+          <PrivateRoute
+            path="/"
+            exact
+            component={Dashboard}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/ckeditor"
+            exact
+            component={Ckeditor}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/ckeditor/:id"
+            exact
+            component={Ckeditor}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/ckeditorlist"
+            exact
+            component={CKList}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/form"
+            exact
+            component={AutoCompleteForm}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/signature"
+            exact
+            component={Signature}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/globalChat"
+            exact
+            component={Chat}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <Route component={_404} />
+        </Switch>
       </Router>
     </div>
   );

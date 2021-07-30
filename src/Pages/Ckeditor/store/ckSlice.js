@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { v4 as uuidV4 } from "uuid";
-import axios from "axios";
-import constants from "../../../constants";
 import {
   setSuccessMessage,
   setErrorMessage,
 } from "../../../store/dashboardSlice";
-axios.defaults.baseURL = constants.API_URL;
+
+import API from "../../../services/api";
 
 const initialState = {
   ckInstances: [
@@ -28,7 +27,7 @@ export const sendData = createAsyncThunk(
   "ck/sendData",
   async (data, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.post("/ck", { data });
+      const res = await API.post("/ck", { data });
       if (res.status) {
         dispatch(setSuccessMessage(res.data.message));
         return res.data;
@@ -45,7 +44,7 @@ export const editData = createAsyncThunk(
   "ck/editData",
   async (data, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.put(`/ck/${data.id}`, { data: data.data });
+      const res = await API.put(`/ck/${data.id}`, { data: data.data });
       if (res.status) {
         dispatch(setSuccessMessage(res.data.message));
         dispatch(updateCkTable(data));
@@ -64,7 +63,7 @@ export const getData = createAsyncThunk(
   "ck/getData",
   async ({ page, limit }, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.get("/ck", {
+      const res = await API.get("/ck", {
         params: {
           page: page,
           limit: limit,
@@ -80,6 +79,7 @@ export const getData = createAsyncThunk(
         return res.data;
       }
     } catch (e) {
+      console.dir(e);
       if (e.response?.data) {
         dispatch(setErrorMessage(e.response?.data.message));
       }
@@ -92,7 +92,7 @@ export const getDataById = createAsyncThunk(
   "ck/getDataById",
   async (id, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.get(`/ck/${id}`);
+      const res = await API.get(`/ck/${id}`);
       if (res.status) {
         return res.data.data;
       }
@@ -109,7 +109,7 @@ export const deleteData = createAsyncThunk(
   "ck/deletedata",
   async (data, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.delete("/ck", { data });
+      const res = await API.delete("/ck", { data });
 
       if (res.status) {
         dispatch(setSuccessMessage(res.data.message));
