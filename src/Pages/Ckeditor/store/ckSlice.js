@@ -18,7 +18,7 @@ const initialState = {
   editMode: false,
   showModal: false,
   page: 1,
-  limit: 5,
+  limit: 10,
   hasMore: true,
   totalRecords: 0,
 };
@@ -92,7 +92,7 @@ export const getDataById = createAsyncThunk(
   async (id, { dispatch, rejectWithValue }) => {
     try {
       const res = await API.get(`/ck/${id}`);
-      if (res.status) {
+      if (res.status && res.data) {
         return res.data.data;
       }
     } catch (e) {
@@ -112,7 +112,7 @@ export const deleteData = createAsyncThunk(
 
       if (res.status) {
         dispatch(setSuccessMessage(res.data.message));
-        dispatch(removeDataFromTableList(data.id));
+        dispatch(removeDataFromTableList(data));
         return res.data;
       }
     } catch (e) {
@@ -146,15 +146,15 @@ export const ckSlice = createSlice({
     },
     removeDataFromTableList: (state, action) => {
       state.ckTableData = state.ckTableData.filter(
-        (ck) => ck.id !== action.payload
+        (ck) => ck.ck_id !== action.payload.id
       );
     },
     clearTableRelatedData: (state, action) => {
-      state.ckTableData = [];
-      state.page = 1;
-      state.hasMore = true;
-      state.limit = 5;
-      state.totalRecords = 0;
+      state.ckTableData = initialState.ckTableData;
+      state.page = initialState.page;
+      state.hasMore = initialState.hasMore;
+      state.limit = initialState.limit;
+      state.totalRecords = initialState.totalRecords;
     },
     setEditMode: (state, action) => {
       state.editMode = action.payload;
@@ -176,7 +176,7 @@ export const ckSlice = createSlice({
     },
     updateCkTable: (state, action) => {
       state.ckTableData.forEach((data) => {
-        if (data.id === action.payload.id * 1) {
+        if (data.ck_id === action.payload.id * 1) {
           data.data = action.payload.data;
         }
       });
@@ -191,17 +191,27 @@ export const ckSlice = createSlice({
       state.totalRecords = action.payload.totalRecords;
     },
     [getDataById.fulfilled]: (state, action) => {
-      state.ckInstances = action.payload.data;
+      if (action.payload?.data) {
+        state.ckInstances = action.payload?.data;
+      } else {
+        state.ckInstances = initialState.ckInstances;
+        state.editMode = false;
+      }
     },
     [editData.fulfilled]: (state, action) => {
       state.ckInstances = initialState.ckInstances;
-
       state.editMode = false;
+    },
+    [deleteData.fulfilled]: (state, action) => {
+      state.totalRecords = state.totalRecords - 1;
     },
     [sendData.rejected]: (state, action) => {},
     [getData.rejected]: (state, action) => {},
-    [getDataById.rejected]: (state, action) => {},
+    [getDataById.rejected]: (state, action) => {
+      state.editMode = false;
+    },
     [editData.rejected]: (state, action) => {},
+    [deleteData.rejected]: (state, action) => {},
   },
 });
 

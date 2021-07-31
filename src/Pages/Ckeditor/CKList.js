@@ -304,14 +304,8 @@ const CKList = (props) => {
           handleYesBtnClicked={handleYesBtnClicked}
         />
       )}
-      <div className="w-full h-full overflow-hidden" ref={outerDiv}>
-        <div
-          className=" overflow-y-auto relative"
-          style={{ height: tableHeight }}
-          id="scroll"
-        >
-          <Table columns={columns} data={ckTableData} />
-        </div>
+      <div className="w-full h-full overflow-auto" id="scroll" ref={outerDiv}>
+        <Table columns={columns} data={ckTableData} />
       </div>
     </div>
   );

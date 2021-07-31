@@ -2,6 +2,7 @@ import store from "../store";
 import { setAuthData, resetAuthData } from "../Pages/Auth/store/authSlice";
 import { resetChatData } from "../Pages/Chat/store/chatSlice";
 import API from "./api";
+import { leaveChatRoom } from "./socket";
 
 export const logout = () => {
   if (window) {
@@ -9,6 +10,7 @@ export const logout = () => {
     localStorage.removeItem("token");
   }
   API.defaults.headers.common["Authorization"] = "";
+  leaveChatRoom();
   store.dispatch(resetAuthData());
   store.dispatch(resetChatData());
 };

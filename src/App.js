@@ -42,19 +42,18 @@ const App = () => {
       "Bearer " + JSON.parse(localStorage.getItem("token"));
   }
 
+  const user = getDataFromLocalStorage();
+  if (user) {
+    dispatch(
+      setAuthData({
+        username: user.username,
+        email: user.email,
+        isAuth: !!user,
+      })
+    );
+  }
+
   useEffect(() => {
-    const user = getDataFromLocalStorage();
-
-    if (user) {
-      dispatch(
-        setAuthData({
-          username: user.username,
-          email: user.email,
-          isAuth: !!user,
-        })
-      );
-    }
-
     connectWithWebSocket();
   }, [dispatch]);
 
@@ -100,7 +99,7 @@ const App = () => {
       <Router>
         {alert.show && (
           <div
-            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-full overflow-hidden shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
+            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-sm overflow-hidden shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
           >
             <div className="flex items-center px-4 mb-2">
               <IoAlertCircleOutline className="text-3xl" />

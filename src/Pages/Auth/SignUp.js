@@ -57,7 +57,7 @@ const SignUp = (props) => {
   return (
     <>
       {isAuth ? (
-        <Redirect to={props.location.state.from.pathname} />
+        <Redirect to="/" />
       ) : (
         <div className="h-screen w-full p-5 flex justify-center items-center bg-gray-700">
           <form

@@ -27,7 +27,7 @@ const Ckeditor = (props) => {
   }, [dispatch, props.match.params.id]);
 
   return (
-    <div className="w-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-y-auto">
+    <div className="w-full py-4 h-full px-4 lg:px-8 flex items-start flex-col overflow-y-auto">
       <div className="flex justify-between items-center mb-8 w-full">
         <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer">
           CKEditor
