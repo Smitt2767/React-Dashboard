@@ -24,6 +24,11 @@ const Ckeditor = (props) => {
         dispatch(setEditMode(true));
       }
     }
+
+    return () => {
+      dispatch(clear());
+      dispatch(setEditMode(false));
+    };
   }, [dispatch, props.match.params.id]);
 
   return (

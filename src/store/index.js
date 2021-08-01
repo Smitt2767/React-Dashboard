@@ -3,6 +3,7 @@ import ckReducer from "../Pages/Ckeditor/store/ckSlice";
 import chatReducer from "../Pages/Chat/store/chatSlice";
 import dashboardSlice from "./dashboardSlice";
 import authReducer from "../Pages/Auth/store/authSlice";
+import privateChatReducer from "../Pages/PrivateChat/store/privateChatSlice";
 
 export default configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export default configureStore({
     dashboard: dashboardSlice,
     chat: chatReducer,
     auth: authReducer,
+    privateChat: privateChatReducer,
   },
 });

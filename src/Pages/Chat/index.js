@@ -92,11 +92,15 @@ const Chat = () => {
               </button>
             ) : null}
             {showUsers && activeUsers.length ? (
-              <div className="absolute top-10 lg:top-12 right-2 h-72 w-60 shadow-xl border-2 border-gray-200 rounded-lg overflow-y-auto bg-gray-100 z-20">
-                {activeUsers.map((user) => {
+              <div className="absolute top-10 lg:top-12 right-2 max-h-72 w-60 shadow-xl border-2 border-gray-200 rounded-lg overflow-y-auto bg-gray-100 z-20">
+                {activeUsers.map((user, i) => {
                   return (
                     <div
-                      className="w-full text-gray-700 bg-gray-200 flex items-center px-4 py-2 border-b-2 border-gray-300"
+                      className={`w-full text-gray-700 bg-gray-200 flex items-center px-4 py-2 ${
+                        activeUsers.length - 1 !== i
+                          ? "border-b-2 border-gray-300"
+                          : ""
+                      }  `}
                       key={user.id}
                     >
                       <span className="text-xl text-gray-50 bg-purple-700 rounded-full w-8 h-8 text-center font-bold align-middle mr-4">

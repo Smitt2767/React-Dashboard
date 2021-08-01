@@ -6,6 +6,7 @@ import {
   BsTerminal,
   BsPencilSquare,
   BsChatDots,
+  BsChatQuote,
 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
@@ -45,6 +46,12 @@ const routes = [
     name: "Global Chat",
     icon: <BsChatDots className="text-2xl" />,
     path: "/globalChat",
+  },
+  {
+    id: 6,
+    name: "Private Chat",
+    icon: <BsChatQuote className="text-2xl" />,
+    path: "/privateChat",
   },
 ];
 

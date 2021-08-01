@@ -18,11 +18,11 @@ import _404 from "./Pages/_404";
 import Ckeditor from "./Pages/Ckeditor";
 import CKList from "./Pages/Ckeditor/CKList";
 import Signature from "./Pages/Signature";
-
 import AutoCompleteForm from "./Pages/AutoCompleteForm";
 import Chat from "./Pages/Chat";
 import Signup from "./Pages/Auth/SignUp";
 import Login from "./Pages/Auth/Login";
+import PrivateChat from "./Pages/PrivateChat";
 
 import { connectWithWebSocket, joinChatRoom } from "./services/socket";
 import { getDataFromLocalStorage } from "./services/jwtService";
@@ -54,11 +54,8 @@ const App = () => {
   }
 
   useEffect(() => {
-    connectWithWebSocket();
-  }, [dispatch]);
-
-  useEffect(() => {
     if (isAuth && username) {
+      connectWithWebSocket();
       joinChatRoom(username);
     }
   }, [username, isAuth]);
@@ -97,9 +94,20 @@ const App = () => {
   return (
     <div className="h-screen relative">
       <Router>
+        {isAuth && (
+          <>
+            <Sidebar openMenu={openMenu} setOpenMenu={setOpenMenu} />
+            <Header openMenu={openMenu} setOpenMenu={setOpenMenu} />
+            <Footer />
+          </>
+        )}
         {alert.show && (
           <div
-            className={`z-50 pt-2 absolute right-5 top-20 bg-opacity-80 cusrsor-pointer flex flex-col  rounded-sm overflow-hidden shadow-xl ${alert.bgColor} ${alert.textColor} alert`}
+            className={`z-50 pt-2 absolute right-5 ${
+              isAuth ? "top-20" : "top-5"
+            } bg-opacity-80 cusrsor-pointer flex flex-col  rounded-sm overflow-hidden shadow-xl ${
+              alert.bgColor
+            } ${alert.textColor} alert`}
           >
             <div className="flex items-center px-4 mb-2">
               <IoAlertCircleOutline className="text-3xl" />
@@ -110,14 +118,6 @@ const App = () => {
               className={`border-b-2 ${alert.borderColor} alert-progress`}
             ></div>
           </div>
-        )}
-
-        {isAuth && (
-          <>
-            <Sidebar openMenu={openMenu} setOpenMenu={setOpenMenu} />
-            <Header openMenu={openMenu} setOpenMenu={setOpenMenu} />
-            <Footer />
-          </>
         )}
 
         <Switch>
@@ -169,6 +169,13 @@ const App = () => {
             path="/globalChat"
             exact
             component={Chat}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/privateChat"
+            exact
+            component={PrivateChat}
             openMenu={openMenu}
             setOpenMenu={setOpenMenu}
           />
