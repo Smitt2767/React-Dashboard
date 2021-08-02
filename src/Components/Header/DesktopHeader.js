@@ -2,6 +2,7 @@ import React from "react";
 import { BsSearch, BsBell } from "react-icons/bs";
 import { AiOutlineMenu } from "react-icons/ai";
 import { useSelector } from "react-redux";
+import ProfileImg from "../ProfileImg";
 
 const DesktopHeader = ({ openMenu, setOpenMenu }) => {
   const { username } = useSelector((state) => state.auth);
@@ -31,11 +32,7 @@ const DesktopHeader = ({ openMenu, setOpenMenu }) => {
           <BsBell className="text-xl " />
           <div className="absolute rounded-full h-2 w-2 top-0 right-0 bg-blue-400"></div>
         </div>
-        <div className="w-10 h-10 text-white bg-blue-600 rounded-full flex justify-center items-center cursor-pointer hover:bg-blue-700">
-          <span className="font-bold text-2xl">
-            {username ? username[0].toUpperCase() : "A"}
-          </span>
-        </div>
+        <ProfileImg username={username} size={85} />
       </div>
     </div>
   );

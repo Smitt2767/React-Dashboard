@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import SignatureCanvas from "react-signature-canvas";
-import axios from "axios";
+import API from "../services/api";
 import { GithubPicker } from "react-color";
 import constants from "../constants";
 import { setSuccessMessage, setErrorMessage } from "../store/dashboardSlice";
@@ -64,11 +64,11 @@ const Signature = () => {
     try {
       let res;
       if (createNew) {
-        res = await axios.post(`${constants.API_URL}/signature`, {
+        res = await API.post(`${constants.API_URL}/signature`, {
           signature: trimmedDataUrl,
         });
       } else {
-        res = await axios.post(`${constants.API_URL}/signature/existing`, {
+        res = await API.post(`${constants.API_URL}/signature/existing`, {
           signature: trimmedDataUrl,
         });
       }

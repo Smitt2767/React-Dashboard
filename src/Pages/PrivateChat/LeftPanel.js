@@ -2,40 +2,42 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getUsers,
-  clearLeftPanel,
   setLeftPanelPage,
-  getUser,
+  setCurrentUser,
+  clearRightPanel,
+  setShowRightPanel,
+  setHasMessage,
 } from "./store/privateChatSlice";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { BsSearch } from "react-icons/bs";
-
-const colors = [
-  "bg-pink-",
-  "bg-purple-",
-  "bg-blue-",
-  "bg-yellow-",
-  "bg-red-",
-  "bg-green-",
-  "bg-indigo-",
-];
+import ProfileImg from "../../Components/ProfileImg";
+import { updateMessagesIsReadStatus } from "../../services/socket";
 
 const LeftPanel = () => {
   const { username } = useSelector((state) => state.auth);
-  const { leftPanel } = useSelector((state) => state.privateChat);
+  const { leftPanel, currentUser, showRightPanel } = useSelector(
+    (state) => state.privateChat
+  );
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
 
   useEffect(() => {
-    return () => {
-      dispatch(clearLeftPanel());
-    };
-  }, [dispatch]);
+    if (!!currentUser) updateMessagesIsReadStatus(currentUser.user_id);
+  }, [currentUser]);
 
   useEffect(() => {
-    dispatch(getUsers({ page: leftPanel.page, limit: leftPanel.limit }));
+    if (!!currentUser) dispatch(setShowRightPanel(true));
+  }, [currentUser, dispatch]);
+
+  useEffect(() => {
+    if (leftPanel.page === 1) {
+      dispatch(getUsers({ page: leftPanel.page, limit: leftPanel.limit }));
+      dispatch(setLeftPanelPage(leftPanel.page + 1));
+    }
   }, [leftPanel.page, leftPanel.limit, dispatch]);
 
   const next = () => {
+    dispatch(getUsers({ page: leftPanel.page, limit: leftPanel.limit }));
     dispatch(setLeftPanelPage(leftPanel.page + 1));
   };
 
@@ -43,33 +45,21 @@ const LeftPanel = () => {
     setSearch(value);
   };
 
-  const handleUserSearchSubmit = () => {
-    // dispatch(getUser(search));
-  };
-
-  const getColor = () => {
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  const ProfileImg = ({ username }) => {
-    return (
-      <div
-        className={`w-12 h-12 text-white ${getColor()}400 rounded-full flex justify-center items-center cursor-pointer hover:${getColor()}500`}
-      >
-        <span className="font-bold text-2xl">{username[0].toUpperCase()}</span>
-      </div>
-    );
-  };
+  const handleUserSearchSubmit = () => {};
 
   return (
-    <div className="h-full w-0 md:w-72 lg:w-96 flex-none flex flex-col p-2 bg-gray-700 text-gray-50">
-      <div className="flex-none px-2 py-3 flex items-center border-b-2 border-gray-500">
+    <div
+      className={`h-full w-full md:w-72 lg:w-96 flex flex-col p-2 bg-gray-700 text-gray-50 ${
+        showRightPanel ? "hidden md:flex" : "flex"
+      } `}
+    >
+      <div className="flex-none px-2 pt-2 pb-3 flex items-center border-b-2 border-gray-500">
         <ProfileImg username={username} />
         <h1 className="ml-4 text-2xl tracking-widest font-bold">
           {username.toUpperCase()}
         </h1>
       </div>
-      <div className="flex-none px-2 py-5">
+      <div className="flex-none px-2 py-3">
         <div className="w-full flex items-center border border-gray-500 rounded-lg p-3">
           <input
             type="text"
@@ -79,11 +69,11 @@ const LeftPanel = () => {
             onChange={(e) => {
               onSearchChange(e.target.value);
             }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && e.keyCode === 13) {
-                handleUserSearchSubmit();
-              }
-            }}
+            // onKeyDown={(e) => {
+            //   if (e.key === "Enter" && e.keyCode === 13) {
+            //     handleUserSearchSubmit();
+            //   }
+            // }}
           />
           <button className="ml-4 p-1" onClick={handleUserSearchSubmit}>
             <BsSearch className="text-2xl" />
@@ -91,17 +81,26 @@ const LeftPanel = () => {
         </div>
       </div>
       <div className="flex-grow overflow-auto bg-gray-600" id="scrollLeftPanel">
-        {leftPanel.users.map((user) => {
-          return (
-            <React.Fragment key={user.user_id}>
-              <InfiniteScroll
-                dataLength={leftPanel.users.length}
-                hasMore={leftPanel.hasMore}
-                next={next}
-                scrollableTarget="scrollLeftPanel"
-              >
+        <InfiniteScroll
+          dataLength={leftPanel.users.length}
+          hasMore={leftPanel.hasMore}
+          next={next}
+          scrollableTarget="scrollLeftPanel"
+        >
+          {leftPanel.users.map((user) => {
+            return (
+              <React.Fragment key={user.user_id}>
                 <div
-                  className={`w-full flex items-center border-b-2 border-gray-700 px-2 py-3 cursor-pointer hover:bg-gray-800`}
+                  className={`w-full flex items-center  border-gray-700 px-4 py-3 cursor-pointer ${
+                    currentUser && currentUser.user_id === user.user_id
+                      ? "bg-gray-700 border-l-4 border-b-0 border-blue-400 "
+                      : "bg-gray-600 border-b-2"
+                  } hover:bg-gray-800`}
+                  onClick={() => {
+                    dispatch(setCurrentUser(user));
+                    dispatch(clearRightPanel());
+                    dispatch(setHasMessage(true));
+                  }}
                 >
                   <ProfileImg username={user.username} />
                   <div className="flex flex-col ml-4 flex-grow">
@@ -123,10 +122,10 @@ const LeftPanel = () => {
                     )}
                   </div>
                 </div>
-              </InfiniteScroll>
-            </React.Fragment>
-          );
-        })}
+              </React.Fragment>
+            );
+          })}
+        </InfiniteScroll>
       </div>
     </div>
   );

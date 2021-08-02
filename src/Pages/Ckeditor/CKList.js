@@ -25,7 +25,7 @@ const CKList = (props) => {
     useSelector((state) => state.ck);
   const dispatch = useDispatch();
   const [id, setId] = useState(null);
-  const [tableHeight, setTableHeight] = useState(0);
+  // const [tableHeight, setTableHeight] = useState(0);
   const outerDiv = React.useRef(null);
 
   const columns = useMemo(
@@ -47,11 +47,11 @@ const CKList = (props) => {
 
   useEffect(() => {
     if (outerDiv && outerDiv.current)
-      setTableHeight(outerDiv.current.offsetHeight);
+      // setTableHeight(outerDiv.current.offsetHeight);
 
-    return () => {
-      dispatch(clearTableRelatedData());
-    };
+      return () => {
+        dispatch(clearTableRelatedData());
+      };
   }, [dispatch]);
 
   useEffect(() => {
@@ -59,7 +59,6 @@ const CKList = (props) => {
   }, [dispatch, page, limit]);
 
   const next = () => {
-    console.log("hiiii");
     dispatch(setPage(page + 1));
   };
 

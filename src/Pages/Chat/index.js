@@ -6,6 +6,7 @@ import { IoIosSend } from "react-icons/io";
 import Picker from "emoji-picker-react";
 import { GrEmoji } from "react-icons/gr";
 import { FiUsers } from "react-icons/fi";
+import ProfileImg from "../../Components/ProfileImg";
 
 const Chat = () => {
   const { messages, typer, activeUsers } = useSelector((state) => state.chat);
@@ -51,9 +52,7 @@ const Chat = () => {
   const LeftMessage = ({ message, at, by }) => {
     return (
       <div className="mr-auto flex">
-        <div className="bg-purple-700 rounded-full h-8 w-8 flex justify-center align-center mr-1">
-          <span className="text-xl text-gray-50">{by[0].toUpperCase()}</span>
-        </div>
+        <ProfileImg username={by} size={80} />
         <div className="bg-blue-200  px-2 lg:px-4 py-1 lg:py-2 rounded-r-lg rounded-bl-lg flex flex-col mb-4  w-60 overflow-hidden">
           <span className="text-xl mb-1">{message}</span>
           <span className="text-xs text-gray-500 flex justify-between items-center">
