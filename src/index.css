@@ -4,27 +4,31 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap");
 
+.scrollRightPanel {
+  scroll-behavior: smooth;
+}
+
 ::-webkit-scrollbar {
   width: 0;
   background: transparent;
 }
 
-#scrollRightPanel::-webkit-scrollbar {
+.scrollRightPanel::-webkit-scrollbar {
   width: 7px;
 }
 /* Track */
-#scrollRightPanel::-webkit-scrollbar-track {
+.scrollRightPanel::-webkit-scrollbar-track {
   box-shadow: inset 0 0 5px rgb(209, 213, 219);
   border-radius: 10px;
 }
 
 /* Handle */
-#scrollRightPanel::-webkit-scrollbar-thumb {
+.scrollRightPanel::-webkit-scrollbar-thumb {
   background: rgb(156, 163, 175);
 }
 
 /* Handle on hover */
-#scrollRightPanel::-webkit-scrollbar-thumb:hover {
+.scrollRightPanel::-webkit-scrollbar-thumb:hover {
   background: rgb(75, 85, 99);
 }
 
@@ -196,4 +200,17 @@
 
 .message:hover .messageMenu {
   display: block;
+}
+
+.usersLoading {
+  animation: userLoading 1.5s infinite;
+}
+
+@keyframes userLoading {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
 }

@@ -77,8 +77,8 @@ const AutoCompleteForm = () => {
   ));
 
   return (
-    <div className="w-full py-4 px-4 md:px-8 flex items-start flex-col overflow-y-auto">
-      <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer mb-8">
+    <div className="w-full h-full py-4 px-4 md:px-8 flex items-start flex-col overflow-auto">
+      <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer mb-8 ">
         Autocomplete Form
       </h1>
       <div className="flex items-center justify-center w-full">

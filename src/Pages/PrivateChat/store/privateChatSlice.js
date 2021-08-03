@@ -11,6 +11,7 @@ const initialState = {
     limit: 10,
     totalRecords: 0,
     hasMore: false,
+    hasUsers: true,
   },
   currentUser: null,
   rightPanel: {
@@ -28,12 +29,13 @@ const initialState = {
 
 export const getUsers = createAsyncThunk(
   "privateChat/getUsers",
-  async ({ page, limit }, { dispatch, rejectWithValue }) => {
+  async ({ page, limit, search }, { dispatch, rejectWithValue }) => {
     try {
       const res = await API.get("/users", {
         params: {
           page: page,
           limit: limit,
+          search,
         },
       });
       if (res.status) {
@@ -132,22 +134,16 @@ export const privateChatSlice = createSlice({
     },
 
     addMessageToUser: (state, action) => {
-      if (
-        !!state.currentUser &&
-        (state.currentUser.user_id === action.payload.to_user ||
-          state.currentUser.user_id === action.payload.from_user)
-      ) {
-        state.rightPanel.messages.unshift(action.payload);
-        state.rightPanel.totalRecords += 1;
-        if (!state.rightPanel.hasMessages) state.rightPanel.hasMessages = true;
-        if (!!!action.payload.by_me) {
-          sendUserReadMessage(
-            action.payload.message_id,
-            action.payload.from_user
-          );
-        }
-        state.rightPanel.newMessageCome = true;
+      state.rightPanel.messages.unshift(action.payload);
+      state.rightPanel.totalRecords += 1;
+      if (!state.rightPanel.hasMessages) state.rightPanel.hasMessages = true;
+      if (!!!action.payload.by_me) {
+        sendUserReadMessage(
+          action.payload.message_id,
+          action.payload.from_user
+        );
       }
+      state.rightPanel.newMessageCome = true;
     },
     setNewMessageCome: (state, action) => {
       state.rightPanel.rightPanelMessageDiv = action.paylod;
@@ -175,6 +171,9 @@ export const privateChatSlice = createSlice({
     setHasMessage: (state, action) => {
       state.rightPanel.hasMessages = action.payload;
     },
+    setHasUsers: (state, action) => {
+      state.leftPanel.hasUsers = action.payload;
+    },
     deleteMessageFromCurrentUserMessages: (state, action) => {
       state.rightPanel.messages = state.rightPanel.messages.filter(
         (message) => message.message_id !== action.payload
@@ -199,6 +198,7 @@ export const privateChatSlice = createSlice({
         ...action.payload.data,
       ];
       state.leftPanel.totalRecords = action.payload.totalRecords;
+      state.leftPanel.hasUsers = !!action.payload.data.length;
     },
 
     [getUserMessages.fulfilled]: (state, action) => {
@@ -234,6 +234,7 @@ export const {
   setNewMessageCome,
   setIsTyping,
   setHasMessage,
+  setHasUsers,
   deleteMessageFromCurrentUserMessages,
   updateMessageInCurrentUserMessages,
 } = privateChatSlice.actions;

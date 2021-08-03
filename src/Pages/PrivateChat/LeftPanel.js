@@ -7,6 +7,7 @@ import {
   clearRightPanel,
   setShowRightPanel,
   setHasMessage,
+  clearLeftPanel,
 } from "./store/privateChatSlice";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { BsSearch } from "react-icons/bs";
@@ -30,14 +31,22 @@ const LeftPanel = () => {
   }, [currentUser, dispatch]);
 
   useEffect(() => {
+    dispatch(clearLeftPanel());
+  }, [search, dispatch]);
+
+  useEffect(() => {
     if (leftPanel.page === 1) {
-      dispatch(getUsers({ page: leftPanel.page, limit: leftPanel.limit }));
+      dispatch(
+        getUsers({ page: leftPanel.page, limit: leftPanel.limit, search })
+      );
       dispatch(setLeftPanelPage(leftPanel.page + 1));
     }
-  }, [leftPanel.page, leftPanel.limit, dispatch]);
+  }, [leftPanel.page, leftPanel.limit, search, dispatch]);
 
   const next = () => {
-    dispatch(getUsers({ page: leftPanel.page, limit: leftPanel.limit }));
+    dispatch(
+      getUsers({ page: leftPanel.page, limit: leftPanel.limit, search })
+    );
     dispatch(setLeftPanelPage(leftPanel.page + 1));
   };
 
@@ -81,51 +90,64 @@ const LeftPanel = () => {
         </div>
       </div>
       <div className="flex-grow overflow-auto bg-gray-600" id="scrollLeftPanel">
-        <InfiniteScroll
-          dataLength={leftPanel.users.length}
-          hasMore={leftPanel.hasMore}
-          next={next}
-          scrollableTarget="scrollLeftPanel"
-        >
-          {leftPanel.users.map((user) => {
-            return (
-              <React.Fragment key={user.user_id}>
-                <div
-                  className={`w-full flex items-center  border-gray-700 px-4 py-3 cursor-pointer ${
-                    currentUser && currentUser.user_id === user.user_id
-                      ? "bg-gray-700 border-l-4 border-b-0 border-blue-400 "
-                      : "bg-gray-600 border-b-2"
-                  } hover:bg-gray-800`}
-                  onClick={() => {
-                    dispatch(setCurrentUser(user));
-                    dispatch(clearRightPanel());
-                    dispatch(setHasMessage(true));
-                  }}
-                >
-                  <ProfileImg username={user.username} />
-                  <div className="flex flex-col ml-4 flex-grow">
-                    <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
-                      {user.username}
-                    </h1>
-                    <p className="text-gray-400">Last Message</p>
-                  </div>
-                  <div className="flex flex-none items-center">
-                    {
-                      <span
-                        className={`mr-3 py-1 px-2 text-center text-xs rounded-full bg-gray-500`}
-                      >
-                        1
-                      </span>
-                    }
-                    {!!user.active && (
-                      <span className="h-3 w-3 rounded-full bg-green-400 mr-3"></span>
-                    )}
-                  </div>
-                </div>
-              </React.Fragment>
-            );
-          })}
-        </InfiniteScroll>
+        {leftPanel.hasUsers ? (
+          !!leftPanel.users.length ? (
+            <InfiniteScroll
+              dataLength={leftPanel.users.length}
+              hasMore={leftPanel.hasMore}
+              next={next}
+              scrollableTarget="scrollLeftPanel"
+            >
+              {leftPanel.users.map((user) => {
+                return (
+                  <React.Fragment key={user.user_id}>
+                    <div
+                      className={`w-full flex items-center  border-gray-700 px-4 py-3 cursor-pointer ${
+                        currentUser && currentUser.user_id === user.user_id
+                          ? "bg-gray-700 border-l-4 border-b-0 border-blue-400 "
+                          : "bg-gray-600 border-b-2"
+                      } hover:bg-gray-800`}
+                      onClick={() => {
+                        if (currentUser.user_id !== user.user_id) {
+                          dispatch(setCurrentUser(user));
+                          dispatch(clearRightPanel());
+                          dispatch(setHasMessage(true));
+                        }
+                      }}
+                    >
+                      <ProfileImg username={user.username} />
+                      <div className="flex flex-col ml-4 flex-grow">
+                        <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
+                          {user.username}
+                        </h1>
+                        <p className="text-gray-400">Last Message</p>
+                      </div>
+                      <div className="flex flex-none items-center">
+                        {
+                          <span
+                            className={`mr-3 py-1 px-2 text-center text-xs rounded-full bg-gray-500`}
+                          >
+                            1
+                          </span>
+                        }
+                        {!!user.active && (
+                          <span className="h-3 w-3 rounded-full bg-green-400 mr-3"></span>
+                        )}
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
+            </InfiniteScroll>
+          ) : (
+            <div className="bg-gray-700 w-full h-full">
+              <div className="h-full bg-gray-600 w-0 usersLoading "></div>
+            </div>
+          )
+        ) : (
+          // No users
+          <div></div>
+        )}
       </div>
     </div>
   );

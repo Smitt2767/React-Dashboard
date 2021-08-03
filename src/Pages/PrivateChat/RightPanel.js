@@ -5,15 +5,9 @@ import moment from "moment";
 import { IoIosSend } from "react-icons/io";
 import Picker from "emoji-picker-react";
 import { GrEmoji } from "react-icons/gr";
-
 import { AiOutlineClose } from "react-icons/ai";
-import {
-  BsCheckAll,
-  BsArrowLeft,
-  BsThreeDotsVertical,
-  BsTrash,
-  BsPencil,
-} from "react-icons/bs";
+import { BsArrowLeft, BsCardImage } from "react-icons/bs";
+
 import {
   getUserMessages,
   setRightPanelPage,
@@ -31,17 +25,27 @@ import {
   updateMessage,
 } from "../../services/socket";
 import InfiniteScroll from "react-infinite-scroll-component";
+import RightMessage from "./RightMessage";
+import LeftMessage from "./LeftMessage";
+import constants from "../../constants";
 
+import { FaQuoteLeft } from "react-icons/fa";
+import { IoMdAttach } from "react-icons/io";
 const RightPanel = () => {
   // refs
   const rightPanelMessageDiv = useRef();
-
+  const galleryRef = useRef();
   // state
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showMessageMenuForMessageId, setShowMessageMenuForMessageId] =
     useState(null);
-  const [editId, setEditId] = useState(null);
+  const [action, setAction] = useState({
+    type: constants.actionTypes.CREATE,
+    id: null,
+    message: null,
+  });
+  const [images, setImages] = useState([]);
 
   // selectors
   const { username } = useSelector((state) => state.auth);
@@ -50,6 +54,20 @@ const RightPanel = () => {
   );
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!!currentUser) {
+      setMessage("");
+      setShowEmojiPicker(false);
+      setShowMessageMenuForMessageId(null);
+      setAction({
+        type: constants.actionTypes.CREATE,
+        id: null,
+        message: null,
+      });
+      setImages([]);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     let id;
@@ -89,11 +107,17 @@ const RightPanel = () => {
 
   const handleMessageSend = () => {
     if (!message) return;
-    if (editId)
+    if (action.type === constants.actionTypes.EDIT)
       updateMessage({
         receiverId: currentUser.user_id,
         message,
-        messageId: editId,
+        messageId: action.id,
+      });
+    else if (action.type === constants.actionTypes.REPLY)
+      sendMessageToUser({
+        to_user: currentUser.user_id,
+        message,
+        replyOf: action.id,
       });
     else
       sendMessageToUser({
@@ -106,7 +130,11 @@ const RightPanel = () => {
 
     if (showEmojiPicker) setShowEmojiPicker(false);
     setMessage("");
-    setEditId(null);
+    setAction({
+      type: constants.actionTypes.CREATE,
+      id: null,
+      message: null,
+    });
   };
 
   const next = () => {
@@ -122,6 +150,12 @@ const RightPanel = () => {
     }
   };
 
+  const onAction = (action) => {
+    setAction({
+      ...action,
+    });
+  };
+
   return (
     <div
       className={`h-full flex-grow bg-gray-100 flex flex-col ${
@@ -130,9 +164,9 @@ const RightPanel = () => {
     >
       {!!currentUser ? (
         <>
-          <div className="flex-none flex items-center px-5 py-3 bg-gray-700 text-gray-50 ">
+          <div className="flex-none flex items-center px-4 py-2 md:px-5 md:py-3 bg-gray-700 text-gray-50 ">
             <BsArrowLeft
-              className=" flex-none mr-2 text-4xl text-gray-400 cursor-pointer hover:text-gray-50 block md:hidden"
+              className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 block md:hidden"
               onClick={() => {
                 dispatch(setShowRightPanel(false));
                 dispatch(setCurrentUser(null));
@@ -150,7 +184,7 @@ const RightPanel = () => {
               ) : !!currentUser.active ? (
                 <p className="text-green-400">Online</p>
               ) : (
-                <p className="text-gray-400">
+                <p className="text-gray-400 text-sm md:text-md">
                   {`last active ${moment(currentUser.last_active).calendar()}`}
                 </p>
               )}
@@ -158,7 +192,7 @@ const RightPanel = () => {
           </div>
           {rightPanel.hasMessages ? (
             <div
-              className="flex-grow overflow-auto flex flex-col-reverse px-3 py-2"
+              className="flex-grow overflow-auto flex flex-col-reverse px-3 py-2 scrollRightPanel"
               id="scrollRightPanel"
               ref={rightPanelMessageDiv}
             >
@@ -183,137 +217,47 @@ const RightPanel = () => {
                     </div>
                   }
                 >
-                  {rightPanel.messages.map((message) => {
+                  {rightPanel.messages.map((message, i) => {
                     return (
                       <React.Fragment key={message.message_id}>
+                        {moment(message.created_at).format("DD") !==
+                          moment(rightPanel.messages[i - 1]?.created_at).format(
+                            "DD"
+                          ) &&
+                          moment(message.created_at).format("DD") !==
+                            moment().format("DD") && (
+                            <div className="w-full flex justify-center items-center mb-4">
+                              <span className="bg-gray-300 text-gray-700 px-3 py-1 font-bold text-sm rounded-full">
+                                {moment(message.created_at).format("DD - MMM")}
+                              </span>
+                            </div>
+                          )}
                         {!!message.by_me ? (
-                          // Right Message
-                          <div className="self-end mb-4 max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl overflow-hidden">
-                            {showMessageMenuForMessageId ===
-                              message.message_id && (
-                              <div className="flex items-center justify-end pb-1">
-                                <div
-                                  className="p-2 bg-blue-500 text-gray-50 mr-1 rounded-full cursor-pointer hover:bg-blue-600"
-                                  onClick={() => {
-                                    setMessage(message.text);
-                                    setEditId(message.message_id);
-                                    setShowMessageMenuForMessageId(null);
-                                  }}
-                                >
-                                  <BsPencil />
-                                </div>
-                                <div
-                                  className="p-2 bg-red-500 text-gray-50 rounded-full cursor-pointer hover:bg-red-600"
-                                  onClick={() => {
-                                    deleteMessage(
-                                      message.message_id,
-                                      currentUser.user_id
-                                    );
-                                    setShowMessageMenuForMessageId(null);
-                                  }}
-                                >
-                                  <BsTrash />
-                                </div>
-                              </div>
-                            )}
-                            <div className="flex flex-row-reverse">
-                              <div className="ml-auto bg-gray-300  px-2 lg:px-4 py-1 lg:py-2 rounded-l-lg rounded-br-lg overflow-hidden z-10 flex message ">
-                                <div className="flex-grow flex flex-col w-5/6">
-                                  <span className="text-lg mb-0.5 truncate">
-                                    {message.text}
-                                  </span>
-                                  <span className="text-xs text-gray-500 flex justify-between items-center">
-                                    <span>
-                                      {moment(message.at).format("hh:MM A")}
-                                    </span>
-                                  </span>
-                                </div>
-                                <div
-                                  className={`flex-none  ${
-                                    message.isRead
-                                      ? "text-blue-600"
-                                      : "text-gray-600"
-                                  } text-lg flex flex-col items-between ml-3`}
-                                >
-                                  <div className="flex-grow">
-                                    <BsThreeDotsVertical
-                                      className="text-gray-900 cursor-pointer messageMenu hidden"
-                                      onClick={() => {
-                                        if (showMessageMenuForMessageId)
-                                          setShowMessageMenuForMessageId(null);
-                                        else
-                                          setShowMessageMenuForMessageId(
-                                            message.message_id
-                                          );
-                                        if (
-                                          showMessageMenuForMessageId !==
-                                          message.message_id
-                                        )
-                                          setShowMessageMenuForMessageId(
-                                            message.message_id
-                                          );
-                                      }}
-                                    />
-                                  </div>
-                                  <BsCheckAll className="flex-none" />
-                                </div>
-                              </div>
-                              {!!message.isEdited && (
-                                <div className="m-2 text-xl hover:text-gray-900 text-gray-600 ">
-                                  <BsPencil />
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                          <RightMessage
+                            message={message}
+                            showMessageMenuForMessageId={
+                              showMessageMenuForMessageId
+                            }
+                            setMessage={setMessage}
+                            onAction={onAction}
+                            setShowMessageMenuForMessageId={
+                              setShowMessageMenuForMessageId
+                            }
+                            deleteMessage={deleteMessage}
+                            action={action}
+                          />
                         ) : (
-                          // Left message
-                          <div className="self-start mb-4 max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-                            {showMessageMenuForMessageId ===
-                              message.message_id && (
-                              <div className="flex items-center justify-end pb-1">
-                                {/* <div className="p-2 bg-red-500 text-gray-50 rounded-full cursor-pointer hover:bg-red-600">
-                                  <BsTrash />
-                                </div> */}
-                              </div>
-                            )}
-                            <div className="flex">
-                              <div className="bg-blue-200 px-2 lg:px-4 py-1 lg:py-2 rounded-r-lg rounded-bl-lg overflow-hidden flex message">
-                                <div className="flex-grow flex flex-col w-5/6">
-                                  <span className="text-lg mb-0.5 truncate ">
-                                    {message.text}
-                                  </span>
-                                  <span className="text-xs text-gray-500 flex justify-between items-center">
-                                    <span>
-                                      {moment(message.at).format("hh:MM A")}
-                                    </span>
-                                  </span>
-                                </div>
-                                <div
-                                  className={`flex-nonetext-lg flex flex-col items-between ml-3`}
-                                >
-                                  <div className="flex-grow">
-                                    <BsThreeDotsVertical
-                                      className="text-gray-900 cursor-pointer messageMenu hidden"
-                                      onClick={() => {
-                                        if (showMessageMenuForMessageId)
-                                          setShowMessageMenuForMessageId(null);
-                                        else
-                                          setShowMessageMenuForMessageId(
-                                            message.message_id
-                                          );
-                                      }}
-                                    />
-                                  </div>
-                                  <div className="w-4"></div>
-                                </div>
-                              </div>
-                              {!!message.isEdited && (
-                                <div className="m-2 text-xl hover:text-gray-900 text-gray-600 ">
-                                  <BsPencil />
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                          <LeftMessage
+                            message={message}
+                            showMessageMenuForMessageId={
+                              showMessageMenuForMessageId
+                            }
+                            setShowMessageMenuForMessageId={
+                              setShowMessageMenuForMessageId
+                            }
+                            onAction={onAction}
+                            action={action}
+                          />
                         )}
                       </React.Fragment>
                     );
@@ -335,11 +279,18 @@ const RightPanel = () => {
               )}
             </div>
           ) : (
-            <div className="w-full h-full flex justify-center items-center text-gray-400 captitalize text-lg tracking-widest ">
+            <div className="w-full h-full flex justify-center items-center text-gray-400 captitalize text-lg tracking-widest text-center ">
               There is no messages send some messages to user...
             </div>
           )}
+          {constants.actionTypes.REPLY === action.type && (
+            <div className="flex-none border-b border-gray-500 text-gray-50 bg-gray-700 px-6 py-3 flex rounded-t-2xl">
+              <FaQuoteLeft className="mr-4 items-start" />
+              <div className="">{action.message}</div>
+            </div>
+          )}
 
+          {/* Footer */}
           <div className="flex-none ">
             <div className="bg-gray-700 flex-none flex items-center w-full p-2 text-gray-50 relative z-20">
               {showEmojiPicker && (
@@ -347,7 +298,7 @@ const RightPanel = () => {
                   pickerStyle={{
                     position: "absolute",
                     top: -330,
-                    right: 10,
+                    left: 10,
                     boxShadow: "none",
                   }}
                   onEmojiClick={(e, emojiObj) => {
@@ -355,11 +306,22 @@ const RightPanel = () => {
                   }}
                 />
               )}
-              <div className="flex w-full flex-grow border border-gray-50 px-4 lg:px-2 py-2 rounded-full mr-2">
+
+              <div className="flex items-center x w-full flex-grow border border-gray-50 px-4 lg:px-2 py-2 rounded-full mr-2">
+                <button
+                  className={`flex-none mr-3`}
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                  <GrEmoji className="text-2xl lg:text-3xl " />
+                </button>
                 <input
-                  className="focus:outline-none flex-grow py-1 bg-transparent lg:px-4 "
+                  className="focus:outline-none flex-grow py-0 md:py-1 bg-transparent lg:px-4 "
                   placeholder={`${
-                    editId ? "Upadte message here..." : "Type message here..."
+                    action.type === constants.actionTypes.EDIT
+                      ? "Upadte message here..."
+                      : action.type === constants.actionTypes.REPLY
+                      ? "Reply message here..."
+                      : "Type message here..."
                   }`}
                   value={message}
                   onChange={(e) => {
@@ -374,20 +336,37 @@ const RightPanel = () => {
                 />
 
                 <button
-                  className={`flex-none overflow-hidden ${
-                    !!editId ? "mr-3" : ""
-                  }`}
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="flex-none mr-1 md:mr-3"
+                  onClick={() => {
+                    if (galleryRef.current) galleryRef.current.click();
+                  }}
                 >
-                  <GrEmoji className="text-2xl lg:text-3xl" />
+                  <input
+                    type="file"
+                    accept="image/*, .pdf, .doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    className="hidden"
+                    ref={galleryRef}
+                    multiple
+                    onChange={(e) => {
+                      if (e.target.files.length) {
+                        setImages([...images, ...e.target.files]);
+                      }
+                    }}
+                  />
+                  <IoMdAttach className="text-2xl transform rotate-45" />
                 </button>
 
-                {!!editId && (
+                {(action.type === constants.actionTypes.EDIT ||
+                  action.type === constants.actionTypes.REPLY) && (
                   <button
                     className="flex-none overflow-hidden rounded-full border border-gray-200 p-1 md:p-2 hover:border-gray-50"
                     onClick={() => {
                       setMessage("");
-                      setEditId(null);
+                      setAction({
+                        type: constants.actionTypes.CREATE,
+                        id: null,
+                        message: null,
+                      });
                     }}
                   >
                     <AiOutlineClose className="text-xl lg:text-lg" />

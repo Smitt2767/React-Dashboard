@@ -41,7 +41,6 @@ const connectMainIo = () => {
   socket.on("connect", () => {
     console.log("successfully connected with main socketIo server...");
 
-    // Events
     socket.on("broadcast-user", ({ type, userId }) => {
       switch (type) {
         case "ONLINE":
@@ -56,7 +55,13 @@ const connectMainIo = () => {
     });
 
     socket.on("sendMessageToUser", (message) => {
-      store.dispatch(addMessageToUser({ ...message, by_me: 0 }));
+      if (
+        !!!!store.getState().privateChat.currentUser &&
+        (store.getState().privateChat.currentUser.user_id === message.to_user ||
+          store.getState().privateChat.currentUser.user_id ===
+            message.from_user)
+      )
+        store.dispatch(addMessageToUser({ ...message, by_me: 0 }));
     });
 
     socket.on("userReadYourMessage", (messageId) => {
@@ -143,7 +148,12 @@ export const connectWithWebSocket = () => {
 // Private Chat Room
 export const sendMessageToUser = (data) => {
   socket.emit("sendMessageToUser", data, (message) => {
-    store.dispatch(addMessageToUser({ ...message, by_me: 1 }));
+    if (
+      !!store.getState().privateChat.currentUser &&
+      (store.getState().privateChat.currentUser.user_id === message.to_user ||
+        store.getState().privateChat.currentUser.user_id === message.from_user)
+    )
+      store.dispatch(addMessageToUser({ ...message, by_me: 1 }));
   });
 };
 export const sendUserReadMessage = (messageId, senderId) => {
