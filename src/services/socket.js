@@ -1,7 +1,7 @@
 import socketIoClient from "socket.io-client";
 import constants from "../constants";
 import store from "../store";
-import { setErrorMessage } from "../store/dashboardSlice";
+import { setErrorMessage, setSuccessMessage } from "../store/dashboardSlice";
 import {
   setSocketId,
   addMessage,
@@ -16,6 +16,11 @@ import {
   setIsTyping,
   deleteMessageFromCurrentUserMessages,
   updateMessageInCurrentUserMessages,
+  updateLeftPanelUsersLastMessageAndTotalUnRead,
+  addRoomToLeftPanel,
+  removeRoomFromRightPanel,
+  updateRoomName,
+  updateAdmin,
 } from "../Pages/PrivateChat/store/privateChatSlice";
 // import * as jwt from "./jwtService";
 
@@ -62,6 +67,9 @@ const connectMainIo = () => {
             message.from_user)
       )
         store.dispatch(addMessageToUser({ ...message, by_me: 0 }));
+      else {
+        store.dispatch(updateLeftPanelUsersLastMessageAndTotalUnRead(message));
+      }
     });
 
     socket.on("userReadYourMessage", (messageId) => {
@@ -103,6 +111,41 @@ const connectMainIo = () => {
         );
       }
     });
+  });
+
+  socket.on("joinNewRoom", (data) => {
+    if (store.getState().privateChat.activeTab === 1)
+      store.dispatch(
+        addRoomToLeftPanel({
+          room_id: data.room_id,
+          roomname: data.roomname,
+          isAdmin: data.isAdmin,
+        })
+      );
+    store.dispatch(setSuccessMessage(data.message));
+  });
+
+  socket.on("KickedOutFromRoom", (data) => {
+    if (store.getState().privateChat.activeTab === 1)
+      store.dispatch(removeRoomFromRightPanel(data.room_id));
+    store.dispatch(setErrorMessage(data.message));
+  });
+
+  socket.on("updateRoomName", (data) => {
+    if (store.getState().privateChat.activeTab === 1)
+      store.dispatch(
+        updateRoomName({
+          roomId: data.room_id,
+          roomname: data.roomname,
+        })
+      );
+  });
+
+  socket.on("updateAdmin", (data) => {
+    store.dispatch(setSuccessMessage(data.message));
+    if (store.getState().privateChat.activeTab === 1) {
+      store.dispatch(updateAdmin(data.room_id));
+    }
   });
 };
 
@@ -154,6 +197,7 @@ export const sendMessageToUser = (data) => {
         store.getState().privateChat.currentUser.user_id === message.from_user)
     )
       store.dispatch(addMessageToUser({ ...message, by_me: 1 }));
+    store.dispatch(updateLeftPanelUsersLastMessageAndTotalUnRead(message));
   });
 };
 export const sendUserReadMessage = (messageId, senderId) => {

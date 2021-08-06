@@ -82,7 +82,7 @@ const RightMessage = ({
             <div className="flex-grow flex flex-col w-5/6">
               <span className="text-lg mb-0.5 truncate">{message.text}</span>
               <span className="text-xs text-gray-500 flex justify-between items-center">
-                <span>{moment(message.created_at).format("hh:MM A")}</span>
+                <span>{moment(message.created_at).format("hh:mm A")}</span>
               </span>
             </div>
             <div

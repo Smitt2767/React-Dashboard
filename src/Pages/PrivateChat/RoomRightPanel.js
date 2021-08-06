@@ -1,42 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import ProfileImg from "../../Components/ProfileImg";
-import moment from "moment";
+import { BsArrowLeft, BsInfoCircle } from "react-icons/bs";
+import {
+  setShowRoomInfoModal,
+  setCurrentRoom,
+  setShowRightPanel,
+  clearLeftPanel,
+  clearRightPanel,
+  getRoomMessages,
+  setRightPanelPage,
+} from "./store/privateChatSlice";
+import RoomRightMessage from "./RoomRightMessage";
+import RoomLeftMessage from "./RoomLeftMessage";
+import RoomInfo from "../../Components/Modal/RoomInfo";
 import { IoIosSend } from "react-icons/io";
 import Picker from "emoji-picker-react";
 import { GrEmoji } from "react-icons/gr";
 import { AiOutlineClose } from "react-icons/ai";
-import { BsArrowLeft } from "react-icons/bs";
-import FilesSection from "./FilesSection";
-import { v4 as uuidV4 } from "uuid";
-import {
-  getUserMessages,
-  setRightPanelPage,
-  setShowRightPanel,
-  clearLeftPanel,
-  clearRightPanel,
-  setCurrentUser,
-  setNewMessageCome,
-  setIsTyping,
-} from "./store/privateChatSlice";
-import {
-  sendMessageToUser,
-  sendTypingStatus,
-  deleteMessage,
-  updateMessage,
-} from "../../services/socket";
-import InfiniteScroll from "react-infinite-scroll-component";
-import RightMessage from "./RightMessage";
-import LeftMessage from "./LeftMessage";
 import constants from "../../constants";
-
-import { FaQuoteLeft } from "react-icons/fa";
-import { IoMdAttach } from "react-icons/io";
-const RightPanel = () => {
+import moment from "moment";
+import InfiniteScroll from "react-infinite-scroll-component";
+const RoomRightPanel = () => {
   // refs
   const rightPanelMessageDiv = useRef();
-  const galleryRef = useRef();
-  // state
+
+  // States
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showMessageMenuForMessageId, setShowMessageMenuForMessageId] =
@@ -46,108 +35,36 @@ const RightPanel = () => {
     id: null,
     message: null,
   });
-  const [files, setFiles] = useState([]);
 
-  // selectors
   const { username } = useSelector((state) => state.auth);
-  const { currentUser, rightPanel, showRightPanel } = useSelector(
-    (state) => state.privateChat
-  );
-
+  const { currentRoom, showRightPanel, showRoomInfoModal, rightPanel } =
+    useSelector((state) => state.privateChat);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!!currentUser) {
-      setMessage("");
-      setShowEmojiPicker(false);
-      setShowMessageMenuForMessageId(null);
-      setAction({
-        type: constants.actionTypes.CREATE,
-        id: null,
-        message: null,
-      });
-      setFiles([]);
-    }
-  }, [currentUser]);
+  const handleMessageSend = () => {
+    if (!message) return;
+  };
 
   useEffect(() => {
-    let id;
-    if (rightPanel.isTyping)
-      id = setTimeout(() => {
-        dispatch(setIsTyping(false));
-      }, [2000]);
-
-    return () => {
-      clearTimeout(id);
-    };
-  }, [rightPanel.isTyping, dispatch]);
-
-  useEffect(() => {
-    if (
-      rightPanel.newMessageCome &&
-      rightPanelMessageDiv &&
-      rightPanelMessageDiv.current
-    ) {
-      rightPanelMessageDiv.current.scrollTop = 0;
-      dispatch(setNewMessageCome(false));
-    }
-  }, [rightPanel.newMessageCome, dispatch]);
-
-  useEffect(() => {
-    if (!!currentUser && rightPanel.page === 1) {
+    if (!!currentRoom && rightPanel.page === 1) {
       dispatch(
-        getUserMessages({
+        getRoomMessages({
           page: rightPanel.page,
           limit: rightPanel.limit,
-          toUserId: currentUser.user_id,
+          room_id: currentRoom.room_id,
         })
       );
       dispatch(setRightPanelPage(rightPanel.page + 1));
     }
-  }, [currentUser, dispatch, rightPanel.page, rightPanel.limit]);
-
-  const handleMessageSend = () => {
-    if (!message && !!!files.length) return;
-    if (action.type === constants.actionTypes.EDIT)
-      updateMessage({
-        receiverId: currentUser.user_id,
-        message,
-        messageId: action.id,
-      });
-    else if (action.type === constants.actionTypes.REPLY)
-      sendMessageToUser({
-        to_user: currentUser.user_id,
-        message,
-        replyOf: action.id,
-      });
-    else
-      sendMessageToUser({
-        to_user: currentUser.user_id,
-        message,
-        files,
-        type: !!files.length ? "file" : "text",
-      });
-
-    if (rightPanelMessageDiv && rightPanelMessageDiv.current)
-      rightPanelMessageDiv.current.scrollTop = 0;
-
-    if (showEmojiPicker) setShowEmojiPicker(false);
-    setMessage("");
-    setAction({
-      type: constants.actionTypes.CREATE,
-      id: null,
-      message: null,
-    });
-    setFiles([]);
-  };
+  }, [currentRoom, dispatch, rightPanel.page, rightPanel.limit]);
 
   const next = () => {
-    if (!!currentUser) {
+    if (!!currentRoom) {
       dispatch(
-        getUserMessages({
+        getRoomMessages({
           page: rightPanel.page,
           limit: rightPanel.limit,
-          toUserId: currentUser.user_id,
+          room_id: currentRoom.room_id,
         })
       );
       dispatch(setRightPanelPage(rightPanel.page + 1));
@@ -162,38 +79,37 @@ const RightPanel = () => {
 
   return (
     <div
-      className={`h-full flex-grow bg-gray-100 flex flex-col ${
+      className={`h-full flex-grow bg-gray-100 flex flex-col  ${
         showRightPanel ? "flex" : "hidden md:flex"
       }`}
     >
-      {!!currentUser ? (
+      {showRoomInfoModal && <RoomInfo />}
+      {currentRoom ? (
         <>
           <div className="flex-none flex items-center px-4 py-2 md:px-5 md:py-3 bg-gray-700 text-gray-50 ">
             <BsArrowLeft
               className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 block md:hidden"
               onClick={() => {
                 dispatch(setShowRightPanel(false));
-                dispatch(setCurrentUser(null));
+                dispatch(setCurrentRoom(null));
                 dispatch(clearLeftPanel());
                 dispatch(clearRightPanel());
               }}
             />
-            <ProfileImg username={currentUser.username} />
+            <ProfileImg username={currentRoom.roomname} />
             <div className="flex flex-col ml-4 flex-grow">
               <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
-                {currentUser.username}
+                {currentRoom.roomname}
               </h1>
-              {rightPanel.isTyping ? (
-                <p className="text-green-400">Typing...</p>
-              ) : !!currentUser.active ? (
-                <p className="text-green-400">Online</p>
-              ) : (
-                <p className="text-gray-400 text-sm md:text-md">
-                  {`last active ${moment(currentUser.last_active).calendar()}`}
-                </p>
-              )}
             </div>
+            <BsInfoCircle
+              className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 "
+              onClick={() => {
+                dispatch(setShowRoomInfoModal(true));
+              }}
+            />
           </div>
+          {/* Body */}
           {rightPanel.hasMessages ? (
             <div
               className="flex-grow overflow-auto flex flex-col-reverse px-3 py-2 scrollRightPanel"
@@ -237,7 +153,7 @@ const RightPanel = () => {
                           </div>
                         )}
                         {!!message.by_me ? (
-                          <RightMessage
+                          <RoomRightMessage
                             message={message}
                             showMessageMenuForMessageId={
                               showMessageMenuForMessageId
@@ -247,11 +163,10 @@ const RightPanel = () => {
                             setShowMessageMenuForMessageId={
                               setShowMessageMenuForMessageId
                             }
-                            deleteMessage={deleteMessage}
                             action={action}
                           />
                         ) : (
-                          <LeftMessage
+                          <RoomLeftMessage
                             message={message}
                             showMessageMenuForMessageId={
                               showMessageMenuForMessageId
@@ -287,12 +202,6 @@ const RightPanel = () => {
               There is no messages send some messages to user...
             </div>
           )}
-          {constants.actionTypes.REPLY === action.type && (
-            <div className="flex-none border-b border-gray-500 text-gray-50 bg-gray-700 px-6 py-3 flex rounded-t-2xl">
-              <FaQuoteLeft className="mr-4 items-start" />
-              <div className="">{action.message}</div>
-            </div>
-          )}
 
           {/* Footer */}
           <div className="flex-none ">
@@ -311,19 +220,10 @@ const RightPanel = () => {
                 />
               )}
 
-              {!!files.length && (
-                <FilesSection
-                  files={files}
-                  setFiles={setFiles}
-                  galleryRef={galleryRef}
-                />
-              )}
-
               <div className="flex items-center x w-full flex-grow border border-gray-50 px-4 lg:px-2 py-2 rounded-full mr-2">
                 <button
                   className={`flex-none mr-3`}
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  disabled={!!files.length}
                 >
                   <GrEmoji className="text-2xl lg:text-3xl " />
                 </button>
@@ -339,45 +239,13 @@ const RightPanel = () => {
                   value={message}
                   onChange={(e) => {
                     setMessage(e.target.value);
-                    sendTypingStatus(currentUser.user_id);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && e.keyCode === 13) {
                       handleMessageSend();
                     }
                   }}
-                  disabled={!!files.length}
                 />
-
-                <button
-                  className="flex-none mr-1 md:mr-3"
-                  onClick={() => {
-                    if (galleryRef.current) galleryRef.current.click();
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/*, .pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    className="hidden"
-                    ref={galleryRef}
-                    multiple
-                    onChange={(e) => {
-                      if (e.target.files.length) {
-                        const data = Object.values(e.target.files).map(
-                          (file) => {
-                            file.preview = file.type.startsWith("image/")
-                              ? URL.createObjectURL(file)
-                              : null;
-                            file.id = uuidV4();
-                            return file;
-                          }
-                        );
-                        setFiles([...files, ...data]);
-                      }
-                    }}
-                  />
-                  <IoMdAttach className="text-2xl transform rotate-45" />
-                </button>
 
                 {(action.type === constants.actionTypes.EDIT ||
                   action.type === constants.actionTypes.REPLY) && (
@@ -423,4 +291,4 @@ const RightPanel = () => {
   );
 };
 
-export default RightPanel;
+export default RoomRightPanel;

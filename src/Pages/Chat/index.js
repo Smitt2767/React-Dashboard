@@ -79,7 +79,7 @@ const Chat = () => {
   return (
     <div className="w-full h-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-hidden">
       {username && (
-        <div className="h-full mx-auto w-full max-w-4xl overflow-hidden flex flex-col items-center rounded-lg shadow-xl">
+        <div className="h-full mx-auto w-full max-w-4xl overflow-hidden flex flex-col items-center  shadow-xl">
           <div className="w-full bg-gray-700 px-4 lg:px-8 py-1 lg:py-2 text-xl lg:text-2xl text-gray-50 flex-none flex justify-between overflow-visible relative">
             <span className="">Chat Room</span>
             {activeUsers.length ? (

@@ -5,6 +5,7 @@ import _ from "lodash";
 import { sendUserReadMessage } from "../../../services/socket";
 
 const initialState = {
+  activeTab: 0,
   leftPanel: {
     users: [],
     page: 1,
@@ -12,8 +13,11 @@ const initialState = {
     totalRecords: 0,
     hasMore: false,
     hasUsers: true,
+    rooms: [],
+    hasRooms: true,
   },
   currentUser: null,
+  currentRoom: null,
   rightPanel: {
     messages: [],
     hasMore: false,
@@ -25,6 +29,9 @@ const initialState = {
     isTyping: false,
   },
   showRightPanel: false,
+  showCreateRoomModal: false,
+  showRoomInfoModal: false,
+  isRoomEdit: false,
 };
 
 export const getUsers = createAsyncThunk(
@@ -42,6 +49,34 @@ export const getUsers = createAsyncThunk(
         const totalRecords = res.data.totalRecords;
         const currentRecords = page * limit;
 
+        if (totalRecords > currentRecords) dispatch(setLeftPanelHasMore(true));
+        else dispatch(setLeftPanelHasMore(false));
+
+        return res.data;
+      }
+    } catch (e) {
+      if (e.response?.data) {
+        dispatch(setErrorMessage(e.response?.data.message));
+      }
+      return rejectWithValue({});
+    }
+  }
+);
+
+export const getRooms = createAsyncThunk(
+  "privateChat/getRooms",
+  async ({ page, limit, search }, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await API.get("/rooms", {
+        params: {
+          page: page,
+          limit: limit,
+          search,
+        },
+      });
+      if (res.status) {
+        const totalRecords = res.data.totalRecords;
+        const currentRecords = page * limit;
         if (totalRecords > currentRecords) dispatch(setLeftPanelHasMore(true));
         else dispatch(setLeftPanelHasMore(false));
 
@@ -85,16 +120,50 @@ export const getUserMessages = createAsyncThunk(
   }
 );
 
+export const getRoomMessages = createAsyncThunk(
+  "privateChat/getRoomMessages",
+  async ({ page, limit, room_id }, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await API.get("/rooms/messages", {
+        params: {
+          page,
+          limit,
+          room_id,
+        },
+      });
+      if (res.status) {
+        const totalRecords = res.data.totalRecords;
+        const currentRecords = page * limit;
+
+        if (totalRecords > currentRecords) dispatch(setRightPanelHasMore(true));
+        else dispatch(setRightPanelHasMore(false));
+
+        return res.data;
+      }
+    } catch (e) {
+      if (e.response?.data) {
+        dispatch(setErrorMessage(e.response?.data.message));
+      }
+      return rejectWithValue({});
+    }
+  }
+);
+
 export const privateChatSlice = createSlice({
   name: "privateChat",
   initialState,
   reducers: {
     clearLeftPanel: (state, action) => {
+      state.currentRoom = initialState.currentRoom;
+      state.currentUser = initialState.currentUser;
       state.leftPanel.users = initialState.leftPanel.users;
       state.leftPanel.totalRecords = initialState.leftPanel.totalRecords;
       state.leftPanel.hasMore = initialState.leftPanel.hasMore;
       state.leftPanel.page = initialState.leftPanel.page;
       state.leftPanel.limit = initialState.leftPanel.limit;
+      state.leftPanel.rooms = initialState.leftPanel.rooms;
+      state.leftPanel.hasUsers = initialState.leftPanel.hasUsers;
+      state.leftPanel.hasRooms = initialState.leftPanel.hasRooms;
     },
     clearRightPanel: (state, action) => {
       state.rightPanel.messages = initialState.rightPanel.messages;
@@ -131,6 +200,22 @@ export const privateChatSlice = createSlice({
     },
     setCurrentUser: (state, action) => {
       state.currentUser = action.payload;
+      if (
+        !!state.leftPanel.users.length &&
+        action.payload &&
+        !!state.leftPanel.users.find(
+          (user) => user.user_id === action.payload.user_id
+        )?.totalUnRead
+      ) {
+        state.leftPanel.users.forEach((user) => {
+          if (user.user_id === action.payload.user_id) {
+            user.totalUnRead = 0;
+          }
+        });
+      }
+    },
+    setCurrentRoom: (state, action) => {
+      state.currentRoom = action.payload;
     },
 
     addMessageToUser: (state, action) => {
@@ -145,6 +230,7 @@ export const privateChatSlice = createSlice({
       }
       state.rightPanel.newMessageCome = true;
     },
+
     setNewMessageCome: (state, action) => {
       state.rightPanel.rightPanelMessageDiv = action.paylod;
     },
@@ -181,7 +267,6 @@ export const privateChatSlice = createSlice({
       state.rightPanel.totalRecords -= 1;
     },
     updateMessageInCurrentUserMessages: (state, action) => {
-      console.log(action.payload);
       state.rightPanel.messages.forEach((message) => {
         if (message.message_id === action.payload.messageId) {
           message.text = action.payload.message;
@@ -189,6 +274,81 @@ export const privateChatSlice = createSlice({
         }
       });
     },
+    updateLeftPanelUsersLastMessageAndTotalUnRead: (state, action) => {
+      state.leftPanel.users.forEach((user) => {
+        if (
+          user.user_id === action.payload.from_user ||
+          user.user_id === action.payload.to_user
+        ) {
+          user.last_message = action.payload.text;
+        }
+        if (user.user_id === action.payload.from_user) {
+          user.last_message = action.payload.text;
+          user.totalUnRead += 1;
+        }
+      });
+    },
+    setActiveTab: (state, action) => {
+      state.activeTab = action.payload;
+    },
+    setShowCreateRoomModal: (state, action) => {
+      state.showCreateRoomModal = action.payload;
+    },
+    addRoomToLeftPanel: (state, action) => {
+      state.leftPanel.rooms.unshift(action.payload);
+      state.leftPanel.hasRooms = true;
+    },
+    removeRoomFromRightPanel: (state, action) => {
+      const newData = state.leftPanel.rooms.filter(
+        (room) => room.room_id !== action.payload
+      );
+      state.leftPanel.rooms = newData;
+
+      if (!!state.currentRoom && state.currentRoom.room_id === action.payload) {
+        state.currentRoom = null;
+      }
+
+      if (state.showRoomInfoModal === true) state.showRoomInfoModal = false;
+      state.leftPanel.hasRooms = !!newData.length;
+    },
+    setShowRoomInfoModal: (state, action) => {
+      state.showRoomInfoModal = action.payload;
+    },
+    handleExitRoom: (state, action) => {
+      state.showRightPanel = false;
+      const newRoomsList = state.leftPanel.rooms.filter(
+        (room) => room.room_id !== state.currentRoom.room_id
+      );
+      state.leftPanel.rooms = newRoomsList;
+      if (!!!newRoomsList.length) state.leftPanel.hasRooms = false;
+      state.currentRoom = null;
+    },
+    setIsRoomEdit: (state, action) => {
+      state.isRoomEdit = action.payload;
+    },
+    updateRoomName: (state, action) => {
+      if (
+        !!state.currentRoom &&
+        state.currentRoom.room_id === action.payload.roomId
+      )
+        state.currentRoom.roomname = action.payload.roomname;
+      state.leftPanel.rooms.forEach((room) => {
+        if (room.room_id === action.payload.roomId) {
+          room.roomname = action.payload.roomname;
+        }
+      });
+    },
+    updateAdmin: (state, action) => {
+      state.leftPanel.rooms.forEach((room) => {
+        if (room.room_id === action.payload) {
+          room.isAdmin = 1;
+        }
+      });
+      if (state.currentRoom && state.currentRoom.room_id === action.payload) {
+        state.currentRoom.isAdmin = 1;
+      }
+    },
+    resetPrivateChat: (state) => initialState,
   },
 
   extraReducers: {
@@ -199,6 +359,14 @@ export const privateChatSlice = createSlice({
       ];
       state.leftPanel.totalRecords = action.payload.totalRecords;
       state.leftPanel.hasUsers = !!action.payload.data.length;
+    },
+    [getRooms.fulfilled]: (state, action) => {
+      state.leftPanel.rooms = [
+        ...state.leftPanel.rooms,
+        ...action.payload.data,
+      ];
+      state.leftPanel.totalRecords = action.payload.totalRecords;
+      state.leftPanel.hasRooms = !!action.payload.data.length;
     },
 
     [getUserMessages.fulfilled]: (state, action) => {
@@ -213,8 +381,22 @@ export const privateChatSlice = createSlice({
       state.rightPanel.hasMessages = !!messages.length;
       state.rightPanel.totalRecords = action.payload.totalRecords;
     },
+    [getRoomMessages.fulfilled]: (state, action) => {
+      const messages = _.uniq(
+        [...state.rightPanel.messages, ...action.payload.data],
+        "message_id"
+      );
+      state.rightPanel.messages = [
+        ...state.rightPanel.messages,
+        ...action.payload.data,
+      ];
+      state.rightPanel.hasMessages = !!messages.length;
+      state.rightPanel.totalRecords = action.payload.totalRecords;
+    },
     [getUsers.rejected]: (state, action) => {},
+    [getRooms.rejected]: (state, action) => {},
     [getUserMessages.rejected]: (state, action) => {},
+    [getRoomMessages.rejected]: (state, action) => {},
   },
 });
 
@@ -237,6 +419,18 @@ export const {
   setHasUsers,
   deleteMessageFromCurrentUserMessages,
   updateMessageInCurrentUserMessages,
+  updateLeftPanelUsersLastMessageAndTotalUnRead,
+  setActiveTab,
+  setCurrentRoom,
+  setShowCreateRoomModal,
+  addRoomToLeftPanel,
+  setShowRoomInfoModal,
+  handleExitRoom,
+  setIsRoomEdit,
+  updateRoomName,
+  removeRoomFromRightPanel,
+  updateAdmin,
+  resetPrivateChat,
 } = privateChatSlice.actions;
 
 export default privateChatSlice.reducer;

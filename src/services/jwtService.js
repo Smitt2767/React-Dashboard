@@ -1,6 +1,7 @@
 import store from "../store";
 import { setAuthData, resetAuthData } from "../Pages/Auth/store/authSlice";
 import { resetChatData } from "../Pages/Chat/store/chatSlice";
+import { resetPrivateChat } from "../Pages/PrivateChat/store/privateChatSlice";
 import API from "./api";
 import * as socket from "./socket";
 
@@ -13,6 +14,7 @@ export const logout = () => {
   socket.logout();
   store.dispatch(resetAuthData());
   store.dispatch(resetChatData());
+  store.dispatch(resetPrivateChat());
 };
 
 export const setLocalStorage = (key, value) => {

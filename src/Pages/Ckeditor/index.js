@@ -73,7 +73,11 @@ const Ckeditor = (props) => {
             onClick={() => {
               dispatch(sendData(ckInstances));
             }}
-            disabled={ckInstances.some((ck) => ck.data === "")}
+            disabled={ckInstances.some(
+              (ck) =>
+                ck.data === "" ||
+                ck.data === '<div class="raw-html-embed"></div>'
+            )}
           >
             Submit
           </button>
@@ -87,7 +91,11 @@ const Ckeditor = (props) => {
               dispatch(setEditMode(false));
               props.history.push("/ckeditor");
             }}
-            disabled={ckInstances.some((ck) => ck.data === "")}
+            disabled={ckInstances.some(
+              (ck) =>
+                ck.data === "" ||
+                ck.data === '<div class="raw-html-embed"></div>'
+            )}
           >
             Save
           </button>
@@ -95,7 +103,11 @@ const Ckeditor = (props) => {
         {!editMode ? (
           <button
             className="text-gray-50 px-10 py-2 font-bold text-xl shadow-lg hover:bg-blue-800 rounded-lg bg-blue-600 ml-8 disabled:bg-gray-400"
-            disabled={ckInstances.every((ck) => ck.data === "")}
+            disabled={ckInstances.every(
+              (ck) =>
+                ck.data === "" ||
+                ck.data === '<div class="raw-html-embed"></div>'
+            )}
             onClick={() => {
               dispatch(clear());
             }}

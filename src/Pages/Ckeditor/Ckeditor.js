@@ -162,6 +162,7 @@ const Ckeditor = ({ ck }) => {
       config={ediotrConfig}
       data={ck.data}
       onChange={(event, editor) => {
+        console.log(editor.getData());
         dispatch(handleCkDataChange({ data: editor.getData(), id: ck.id }));
       }}
       onReady={(editor) => {

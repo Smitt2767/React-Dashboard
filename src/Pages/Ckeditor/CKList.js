@@ -50,7 +50,6 @@ const CKList = ({ history }) => {
       {
         Header: "Actions",
         accessor: (originalRow, rowIndex) => {
-          console.log(originalRow, rowIndex);
           return (
             <div className="flex h-full justify-center items-center">
               <button

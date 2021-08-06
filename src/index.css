@@ -32,7 +32,7 @@
   background: rgb(75, 85, 99);
 }
 
-.ck-content * {
+.ck-content *:not(.raw-html-embed__buttons-wrapper *) {
   all: revert;
 }
 
@@ -213,4 +213,14 @@
   100% {
     width: 100%;
   }
+}
+.css-yk16xz-control {
+  border: 2px solid rgba(156, 163, 175) !important;
+  padding: 0.4rem;
+  outline: none !important;
+}
+.css-1pahdxg-control {
+  border: 2px solid rgba(156, 163, 175) !important;
+  padding: 0.4rem;
+  outline: none !important;
 }

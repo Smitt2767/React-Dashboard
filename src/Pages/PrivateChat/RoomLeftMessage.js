@@ -2,8 +2,9 @@ import React from "react";
 import moment from "moment";
 import { BsThreeDotsVertical, BsPencil, BsReply } from "react-icons/bs";
 import constants from "../../constants";
+import ProfileImg from "../../Components/ProfileImg";
 
-const LeftMessage = ({
+const RoomLeftMessage = ({
   showMessageMenuForMessageId,
   setShowMessageMenuForMessageId,
   message,
@@ -37,7 +38,8 @@ const LeftMessage = ({
       )}
 
       <div className="flex">
-        <div className="bg-blue-200 px-2 lg:px-4 py-1 lg:py-2 rounded-r-lg rounded-bl-lg overflow-hidden flex flex-col message">
+        <ProfileImg username={message.username} size={85} />
+        <div className="bg-blue-200 px-2 lg:px-4 py-1 lg:py-2 rounded-r-lg rounded-bl-lg overflow-hidden flex flex-col message ml-1">
           {!!message.replyOf && (
             <a
               className="text-gray-700 pt-1 pb-3 mb-1 border-b-2 border-gray-500 w-full truncate"
@@ -50,12 +52,12 @@ const LeftMessage = ({
           )}
           <div className="flex">
             <div className="flex-grow flex flex-col w-5/6">
-              <span className="text-lg mb-0.5 truncate ">{message.text}</span>
-              <span className="text-xs text-gray-500 flex justify-between items-center">
+              <span className="text-lg mb-0.5 truncate">{message.text}</span>
+              <span className="text-xs text-gray-500 flex justify-between items-center w-full ">
                 <span>{moment(message.created_at).format("hh:mm A")}</span>
               </span>
             </div>
-            <div className={`flex-none  flex flex-col items-between ml-3 py-1`}>
+            <div className={`flex-none flex flex-col items-end ml-8 py-1`}>
               <div className="flex-grow">
                 <BsThreeDotsVertical
                   className="text-gray-900 text-xm cursor-pointer messageMenu block lg:hidden"
@@ -68,7 +70,9 @@ const LeftMessage = ({
                   }}
                 />
               </div>
-              <div className="w-4 flex-none"></div>
+              <div className="flex-none text-xs uppercase text-gray-500 -mb-1">
+                -- {message.username}
+              </div>
             </div>
           </div>
         </div>
@@ -82,4 +86,4 @@ const LeftMessage = ({
   );
 };
 
-export default LeftMessage;
+export default RoomLeftMessage;
