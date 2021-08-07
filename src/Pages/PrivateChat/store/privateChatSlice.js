@@ -3,7 +3,6 @@ import API from "../../../services/api";
 import { setErrorMessage } from "../../../store/dashboardSlice";
 import _ from "lodash";
 import { sendUserReadMessage } from "../../../services/socket";
-
 const initialState = {
   activeTab: 0,
   leftPanel: {
@@ -27,6 +26,7 @@ const initialState = {
     hasMessages: true,
     newMessageCome: false,
     isTyping: false,
+    whoIsTyping: null,
   },
   showRightPanel: false,
   showCreateRoomModal: false,
@@ -348,6 +348,30 @@ export const privateChatSlice = createSlice({
         state.currentRoom.isAdmin = 1;
       }
     },
+    addMessageToRoom: (state, action) => {
+      state.rightPanel.messages.unshift(action.payload);
+      state.rightPanel.totalRecords += 1;
+      if (!state.rightPanel.hasMessages) state.rightPanel.hasMessages = true;
+      state.rightPanel.newMessageCome = true;
+    },
+    setWhoIsTyping: (state, action) => {
+      state.rightPanel.whoIsTyping = action.payload;
+    },
+    deleteMessageFromRoom: (state, action) => {
+      state.rightPanel.messages = state.rightPanel.messages.filter(
+        (message) => message.message_id !== action.payload
+      );
+      state.rightPanel.totalRecords -= 1;
+    },
+    updateMessageToRoom: (state, action) => {
+      state.rightPanel.messages.forEach((message) => {
+        if (message.message_id === action.payload.message_id) {
+          message.isEdited = 1;
+          message.text = action.payload.message;
+        }
+      });
+    },
+
     resetPrivateChat: (state) => initialState,
   },
 
@@ -431,6 +455,10 @@ export const {
   removeRoomFromRightPanel,
   updateAdmin,
   resetPrivateChat,
+  addMessageToRoom,
+  setWhoIsTyping,
+  deleteMessageFromRoom,
+  updateMessageToRoom,
 } = privateChatSlice.actions;
 
 export default privateChatSlice.reducer;

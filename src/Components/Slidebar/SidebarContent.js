@@ -57,7 +57,7 @@ const routes = [
 
 const SidebarContent = ({ openMenu, setOpenMenu }) => {
   const [active, setActive] = useState(1);
-  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const [subMenuId, setSubMenuId] = useState(null);
 
   useEffect(() => {
     setActive(
@@ -83,9 +83,8 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
       })
       .filter((value) => value !== null);
 
-    if (!subMenusIds.includes(active))
-      if (isSubMenuOpen) setIsSubMenuOpen(false);
-  }, [active, isSubMenuOpen]);
+    if (!subMenusIds.includes(active)) if (subMenuId) setSubMenuId(null);
+  }, [active, subMenuId]);
 
   return (
     <div className="h-full flex flex-col text-white">
@@ -136,9 +135,11 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
                     </Link>
                   ) : (
                     <div
-                      className="flex flex-col w-full "
+                      className="flex flex-col w-full"
                       onClick={() => {
-                        setIsSubMenuOpen(!isSubMenuOpen);
+                        if (!subMenuId || subMenuId !== route.id)
+                          setSubMenuId(route.id);
+                        else setSubMenuId(null);
                       }}
                     >
                       <div className="flex items-center w-full pl-10 py-3">
@@ -146,7 +147,7 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
                         <div className="ml-3 w-4/6 flex items-center justify-between">
                           <span>{route.name}</span>
                           <span>
-                            {isSubMenuOpen ? (
+                            {subMenuId === route.id ? (
                               <GoTriangleUp />
                             ) : (
                               <GoTriangleDown />
@@ -154,7 +155,7 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
                           </span>
                         </div>
                       </div>
-                      {isSubMenuOpen && (
+                      {subMenuId === route.id && (
                         <div className="w-full">
                           <SidebarSubMenu
                             routes={route.routes}

@@ -1,14 +1,14 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import moment from "moment";
 import {
-  BsCheckAll,
   BsThreeDotsVertical,
   BsTrash,
   BsPencil,
   BsReply,
 } from "react-icons/bs";
 import constants from "../../constants";
+import { deleteRoomMessage } from "../../services/socket";
+import { useSelector } from "react-redux";
 
 const RoomRightMessage = ({
   message,
@@ -16,10 +16,9 @@ const RoomRightMessage = ({
   setMessage,
   onAction,
   setShowMessageMenuForMessageId,
-  deleteMessage,
   action,
 }) => {
-  const { currentUser } = useSelector((state) => state.privateChat);
+  const { currentRoom } = useSelector((state) => state.privateChat);
 
   return (
     <div
@@ -59,6 +58,7 @@ const RoomRightMessage = ({
             className="p-2 bg-red-500 text-gray-50 rounded-full cursor-pointer hover:bg-red-600"
             onClick={() => {
               setShowMessageMenuForMessageId(null);
+              deleteRoomMessage(message.message_id, currentRoom.room_id);
             }}
           >
             <BsTrash />

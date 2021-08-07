@@ -21,6 +21,10 @@ import {
   removeRoomFromRightPanel,
   updateRoomName,
   updateAdmin,
+  addMessageToRoom,
+  setWhoIsTyping,
+  deleteMessageFromRoom,
+  updateMessageToRoom,
 } from "../Pages/PrivateChat/store/privateChatSlice";
 // import * as jwt from "./jwtService";
 
@@ -123,12 +127,14 @@ const connectMainIo = () => {
         })
       );
     store.dispatch(setSuccessMessage(data.message));
+    socket.emit("join", data.room_id);
   });
 
   socket.on("KickedOutFromRoom", (data) => {
     if (store.getState().privateChat.activeTab === 1)
       store.dispatch(removeRoomFromRightPanel(data.room_id));
     store.dispatch(setErrorMessage(data.message));
+    socket.emit("leave", data.room_id);
   });
 
   socket.on("updateRoomName", (data) => {
@@ -146,6 +152,39 @@ const connectMainIo = () => {
     if (store.getState().privateChat.activeTab === 1) {
       store.dispatch(updateAdmin(data.room_id));
     }
+  });
+
+  socket.on("room_new_message", (data) => {
+    if (
+      store.getState().privateChat.activeTab === 1 &&
+      store.getState().privateChat.currentRoom.room_id === data.roomId
+    ) {
+      store.dispatch(addMessageToRoom(data.message));
+    }
+  });
+
+  socket.on("who_is_typing", ({ username, room_id }) => {
+    if (
+      store.getState().privateChat.activeTab === 1 &&
+      store.getState().privateChat.currentRoom.room_id === room_id
+    )
+      store.dispatch(setWhoIsTyping(username));
+  });
+
+  socket.on("deleteRoomMessage", ({ message_id, room_id }) => {
+    if (
+      store.getState().privateChat.activeTab === 1 &&
+      store.getState().privateChat.currentRoom.room_id === room_id
+    )
+      store.dispatch(deleteMessageFromRoom(message_id));
+  });
+
+  socket.on("updateRoomMessage", ({ message_id, room_id, message }) => {
+    if (
+      store.getState().privateChat.activeTab === 1 &&
+      store.getState().privateChat.currentRoom.room_id === room_id
+    )
+      store.dispatch(updateMessageToRoom({ message_id, message }));
   });
 };
 
@@ -183,7 +222,7 @@ const connectGlobalChatIo = () => {
   });
 };
 
-export const connectWithWebSocket = () => {
+export const connectWithWebSocket = async () => {
   connectMainIo();
   connectGlobalChatIo();
 };
@@ -251,4 +290,31 @@ export const sendTypingData = (data) => {
 export const logout = () => {
   globalChatSocket.disconnect();
   socket.disconnect();
+};
+
+// Roomsssssssss
+export const roomNewMessage = (data) => {
+  socket.emit("room_new_message", data, (data) => {
+    if (
+      store.getState().privateChat.activeTab === 1 &&
+      store.getState().privateChat.currentRoom.room_id === data.roomId
+    ) {
+      store.dispatch(addMessageToRoom(data.message));
+    }
+  });
+};
+
+export const sendWhoIsTyoing = (room_id) => {
+  socket.emit("who_is_typing", room_id);
+};
+
+export const deleteRoomMessage = (message_id, room_id) => {
+  socket.emit("deleteRoomMessage", {
+    message_id,
+    room_id,
+  });
+};
+
+export const updateRoomMessage = (data) => {
+  socket.emit("updateRoomMessage", data);
 };

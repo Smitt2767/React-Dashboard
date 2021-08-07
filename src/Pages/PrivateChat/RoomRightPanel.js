@@ -10,6 +10,7 @@ import {
   clearRightPanel,
   getRoomMessages,
   setRightPanelPage,
+  setWhoIsTyping,
 } from "./store/privateChatSlice";
 import RoomRightMessage from "./RoomRightMessage";
 import RoomLeftMessage from "./RoomLeftMessage";
@@ -21,6 +22,14 @@ import { AiOutlineClose } from "react-icons/ai";
 import constants from "../../constants";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { FaQuoteLeft } from "react-icons/fa";
+
+import {
+  roomNewMessage,
+  sendWhoIsTyoing,
+  updateRoomMessage,
+} from "../../services/socket";
+
 const RoomRightPanel = () => {
   // refs
   const rightPanelMessageDiv = useRef();
@@ -43,6 +52,33 @@ const RoomRightPanel = () => {
 
   const handleMessageSend = () => {
     if (!message) return;
+
+    if (action.type === constants.actionTypes.CREATE) {
+      roomNewMessage({
+        room_id: currentRoom.room_id,
+        message,
+      });
+    }
+    if (action.type === constants.actionTypes.EDIT)
+      updateRoomMessage({
+        room_id: currentRoom.room_id,
+        message,
+        message_id: action.id,
+      });
+    if (action.type === constants.actionTypes.REPLY)
+      roomNewMessage({
+        room_id: currentRoom.room_id,
+        message,
+        replyOf: action.id,
+      });
+
+    setMessage("");
+    setAction({
+      type: constants.actionTypes.CREATE,
+      id: null,
+      message: null,
+    });
+    if (showEmojiPicker) setShowEmojiPicker(false);
   };
 
   useEffect(() => {
@@ -57,6 +93,18 @@ const RoomRightPanel = () => {
       dispatch(setRightPanelPage(rightPanel.page + 1));
     }
   }, [currentRoom, dispatch, rightPanel.page, rightPanel.limit]);
+
+  useEffect(() => {
+    let id;
+    if (!!rightPanel.whoIsTyping)
+      id = setTimeout(() => {
+        dispatch(setWhoIsTyping(null));
+      }, [2000]);
+
+    return () => {
+      clearTimeout(id);
+    };
+  }, [rightPanel.whoIsTyping, dispatch]);
 
   const next = () => {
     if (!!currentRoom) {
@@ -80,7 +128,7 @@ const RoomRightPanel = () => {
   return (
     <div
       className={`h-full flex-grow bg-gray-100 flex flex-col  ${
-        showRightPanel ? "flex" : "hidden md:flex"
+        showRightPanel ? "flex" : "hidden lg:flex"
       }`}
     >
       {showRoomInfoModal && <RoomInfo />}
@@ -88,7 +136,7 @@ const RoomRightPanel = () => {
         <>
           <div className="flex-none flex items-center px-4 py-2 md:px-5 md:py-3 bg-gray-700 text-gray-50 ">
             <BsArrowLeft
-              className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 block md:hidden"
+              className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 block lg:hidden"
               onClick={() => {
                 dispatch(setShowRightPanel(false));
                 dispatch(setCurrentRoom(null));
@@ -101,6 +149,11 @@ const RoomRightPanel = () => {
               <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
                 {currentRoom.roomname}
               </h1>
+              {!!rightPanel.whoIsTyping && (
+                <span className="text-green-500 text-sm font-bold">
+                  {rightPanel.whoIsTyping} is typing...
+                </span>
+              )}
             </div>
             <BsInfoCircle
               className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 "
@@ -202,7 +255,12 @@ const RoomRightPanel = () => {
               There is no messages send some messages to user...
             </div>
           )}
-
+          {constants.actionTypes.REPLY === action.type && (
+            <div className="flex-none border-b border-gray-500 text-gray-50 bg-gray-700 px-6 py-3 flex rounded-t-2xl">
+              <FaQuoteLeft className="mr-4 items-start" />
+              <div className="">{action.message}</div>
+            </div>
+          )}
           {/* Footer */}
           <div className="flex-none ">
             <div className="bg-gray-700 flex-none flex items-center w-full p-2 text-gray-50 relative z-20">
@@ -239,6 +297,7 @@ const RoomRightPanel = () => {
                   value={message}
                   onChange={(e) => {
                     setMessage(e.target.value);
+                    sendWhoIsTyoing(currentRoom.room_id);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && e.keyCode === 13) {

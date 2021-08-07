@@ -224,3 +224,10 @@
   padding: 0.4rem;
   outline: none !important;
 }
+
+.draftAsync .css-yk16xz-control {
+  border-width: 2px !important;
+  border-color: rgba(156, 163, 175, 1) !important;
+  border-radius: 0.5rem !important;
+  padding: 3px !important;
+}

@@ -163,35 +163,39 @@ const RightPanel = () => {
   return (
     <div
       className={`h-full flex-grow bg-gray-100 flex flex-col ${
-        showRightPanel ? "flex" : "hidden md:flex"
+        showRightPanel ? "flex" : "hidden lg:flex"
       }`}
     >
       {!!currentUser ? (
         <>
-          <div className="flex-none flex items-center px-4 py-2 md:px-5 md:py-3 bg-gray-700 text-gray-50 ">
-            <BsArrowLeft
-              className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 block md:hidden"
-              onClick={() => {
-                dispatch(setShowRightPanel(false));
-                dispatch(setCurrentUser(null));
-                dispatch(clearLeftPanel());
-                dispatch(clearRightPanel());
-              }}
-            />
-            <ProfileImg username={currentUser.username} />
-            <div className="flex flex-col ml-4 flex-grow">
-              <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
-                {currentUser.username}
-              </h1>
-              {rightPanel.isTyping ? (
-                <p className="text-green-400">Typing...</p>
-              ) : !!currentUser.active ? (
-                <p className="text-green-400">Online</p>
-              ) : (
-                <p className="text-gray-400 text-sm md:text-md">
-                  {`last active ${moment(currentUser.last_active).calendar()}`}
-                </p>
-              )}
+          <div className="flex-none flex items-center justify-between px-4 py-2 md:px-5 md:py-3 bg-gray-700 text-gray-50 ">
+            <div className="flex-grow flex items-center">
+              <BsArrowLeft
+                className="flex-none mr-2 text-3xl text-gray-400 cursor-pointer hover:text-gray-50 block lg:hidden"
+                onClick={() => {
+                  dispatch(setShowRightPanel(false));
+                  dispatch(setCurrentUser(null));
+                  dispatch(clearLeftPanel());
+                  dispatch(clearRightPanel());
+                }}
+              />
+              <ProfileImg username={currentUser.username} />
+              <div className="flex flex-col ml-4 flex-grow">
+                <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
+                  {currentUser.username}
+                </h1>
+                {rightPanel.isTyping ? (
+                  <p className="text-green-400">Typing...</p>
+                ) : !!currentUser.active ? (
+                  <p className="text-green-400">Online</p>
+                ) : (
+                  <p className="text-gray-400 text-sm md:text-md">
+                    {`last active ${moment(
+                      currentUser.last_active
+                    ).calendar()}`}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           {rightPanel.hasMessages ? (

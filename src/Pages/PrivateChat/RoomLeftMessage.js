@@ -12,7 +12,7 @@ const RoomLeftMessage = ({
 }) => {
   return (
     <div
-      className="self-start mb-4 max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl"
+      className="self-start mb-4 max-w-2xl"
       id={`message_${message.message_id}`}
     >
       {showMessageMenuForMessageId === message.message_id && (
@@ -37,9 +37,9 @@ const RoomLeftMessage = ({
         </div>
       )}
 
-      <div className="flex">
+      <div className="flex items-start">
         <ProfileImg username={message.username} size={85} />
-        <div className="bg-blue-200 px-2 lg:px-4 py-1 lg:py-2 rounded-r-lg rounded-bl-lg overflow-hidden flex flex-col message ml-1">
+        <div className="bg-blue-200 px-2 lg:px-4 py-1 lg:py-2 rounded-r-lg rounded-bl-lg overflow-hidden flex flex-col message ml-1 max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl">
           {!!message.replyOf && (
             <a
               className="text-gray-700 pt-1 pb-3 mb-1 border-b-2 border-gray-500 w-full truncate"
@@ -57,7 +57,7 @@ const RoomLeftMessage = ({
                 <span>{moment(message.created_at).format("hh:mm A")}</span>
               </span>
             </div>
-            <div className={`flex-none flex flex-col items-end ml-8 py-1`}>
+            <div className={`flex-none flex flex-col items-end pl-1 py-1`}>
               <div className="flex-grow">
                 <BsThreeDotsVertical
                   className="text-gray-900 text-xm cursor-pointer messageMenu block lg:hidden"

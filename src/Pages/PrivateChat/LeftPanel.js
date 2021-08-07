@@ -13,7 +13,6 @@ import {
   setCurrentRoom,
   setShowCreateRoomModal,
 } from "./store/privateChatSlice";
-import CreateRoom from "../../Components/Modal/CreateRoom";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { BsSearch, BsPlusCircle } from "react-icons/bs";
 import ProfileImg from "../../Components/ProfileImg";
@@ -21,14 +20,8 @@ import { updateMessagesIsReadStatus } from "../../services/socket";
 
 const LeftPanel = () => {
   const { username } = useSelector((state) => state.auth);
-  const {
-    leftPanel,
-    currentUser,
-    showRightPanel,
-    activeTab,
-    currentRoom,
-    showCreateRoomModal,
-  } = useSelector((state) => state.privateChat);
+  const { leftPanel, currentUser, showRightPanel, activeTab, currentRoom } =
+    useSelector((state) => state.privateChat);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
 
@@ -83,11 +76,10 @@ const LeftPanel = () => {
 
   return (
     <div
-      className={`h-full w-full md:w-72 lg:w-96 flex flex-col p-2 bg-gray-700 text-gray-50 ${
-        showRightPanel ? "hidden md:flex" : "flex"
+      className={`h-full w-full  lg:w-96 flex flex-col p-2 bg-gray-700 text-gray-50 ${
+        showRightPanel ? "hidden lg:flex" : "flex"
       } `}
     >
-      {showCreateRoomModal && <CreateRoom />}
       <div className="flex-none px-2 pt-2 pb-3 flex items-center border-b-2 border-gray-500">
         <ProfileImg username={username} />
         <h1 className="ml-4 text-2xl tracking-widest font-bold">

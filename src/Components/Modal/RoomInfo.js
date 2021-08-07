@@ -80,9 +80,9 @@ const RoomInfo = () => {
                   <button
                     className="flex-none bg-blue-600 hover:bg-blue-700 hover:text-gray-50 rounded-full p-2 shadow-2xl text-gray-200 focus:outline-none text-lg"
                     onClick={() => {
+                      dispatch(setShowRoomInfoModal(false));
                       dispatch(setIsRoomEdit(true));
                       dispatch(setShowCreateRoomModal(true));
-                      dispatch(setShowRoomInfoModal(false));
                     }}
                   >
                     <BsPencil />
