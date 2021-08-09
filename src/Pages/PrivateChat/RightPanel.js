@@ -45,6 +45,7 @@ const RightPanel = () => {
     type: constants.actionTypes.CREATE,
     id: null,
     message: null,
+    isLast: false,
   });
   const [files, setFiles] = useState([]);
 
@@ -65,6 +66,7 @@ const RightPanel = () => {
         type: constants.actionTypes.CREATE,
         id: null,
         message: null,
+        isLast: false,
       });
       setFiles([]);
     }
@@ -113,6 +115,7 @@ const RightPanel = () => {
         receiverId: currentUser.user_id,
         message,
         messageId: action.id,
+        isLast: action.isLast,
       });
     else if (action.type === constants.actionTypes.REPLY)
       sendMessageToUser({
@@ -137,6 +140,7 @@ const RightPanel = () => {
       type: constants.actionTypes.CREATE,
       id: null,
       message: null,
+      isLast: false,
     });
     setFiles([]);
   };
@@ -253,6 +257,10 @@ const RightPanel = () => {
                             }
                             deleteMessage={deleteMessage}
                             action={action}
+                            isLast={
+                              rightPanel.messages[0].message_id ===
+                              message.message_id
+                            }
                           />
                         ) : (
                           <LeftMessage
@@ -393,6 +401,7 @@ const RightPanel = () => {
                         type: constants.actionTypes.CREATE,
                         id: null,
                         message: null,
+                        isLast: false,
                       });
                     }}
                   >

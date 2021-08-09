@@ -17,8 +17,9 @@ const RoomRightMessage = ({
   onAction,
   setShowMessageMenuForMessageId,
   action,
+  isLast,
 }) => {
-  const { currentRoom } = useSelector((state) => state.privateChat);
+  const { currentRoom, rightPanel } = useSelector((state) => state.privateChat);
 
   return (
     <div
@@ -48,6 +49,7 @@ const RoomRightMessage = ({
                 ...action,
                 type: constants.actionTypes.EDIT,
                 id: message.message_id,
+                isLast,
               });
               setShowMessageMenuForMessageId(null);
             }}
@@ -58,7 +60,12 @@ const RoomRightMessage = ({
             className="p-2 bg-red-500 text-gray-50 rounded-full cursor-pointer hover:bg-red-600"
             onClick={() => {
               setShowMessageMenuForMessageId(null);
-              deleteRoomMessage(message.message_id, currentRoom.room_id);
+              deleteRoomMessage(
+                message.message_id,
+                currentRoom.room_id,
+                isLast,
+                rightPanel.messages[1].text
+              );
             }}
           >
             <BsTrash />

@@ -18,8 +18,9 @@ const RightMessage = ({
   setShowMessageMenuForMessageId,
   deleteMessage,
   action,
+  isLast,
 }) => {
-  const { currentUser } = useSelector((state) => state.privateChat);
+  const { currentUser, rightPanel } = useSelector((state) => state.privateChat);
 
   return (
     <div
@@ -35,6 +36,7 @@ const RightMessage = ({
                 type: constants.actionTypes.REPLY,
                 id: message.message_id,
                 message: message.text,
+                isLast: false,
               });
               setShowMessageMenuForMessageId(null);
             }}
@@ -49,6 +51,7 @@ const RightMessage = ({
                 ...action,
                 type: constants.actionTypes.EDIT,
                 id: message.message_id,
+                isLast: isLast,
               });
               setShowMessageMenuForMessageId(null);
             }}
@@ -58,7 +61,12 @@ const RightMessage = ({
           <div
             className="p-2 bg-red-500 text-gray-50 rounded-full cursor-pointer hover:bg-red-600"
             onClick={() => {
-              deleteMessage(message.message_id, currentUser.user_id);
+              deleteMessage(
+                message.message_id,
+                currentUser.user_id,
+                isLast,
+                rightPanel.messages[1].text
+              );
               setShowMessageMenuForMessageId(null);
             }}
           >

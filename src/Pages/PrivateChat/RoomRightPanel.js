@@ -10,6 +10,7 @@ import {
   clearRightPanel,
   getRoomMessages,
   setRightPanelPage,
+  setNewMessageCome,
   setWhoIsTyping,
 } from "./store/privateChatSlice";
 import RoomRightMessage from "./RoomRightMessage";
@@ -23,13 +24,13 @@ import constants from "../../constants";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { FaQuoteLeft } from "react-icons/fa";
-
+import { MentionsInput, Mention } from "react-mentions";
 import {
   roomNewMessage,
   sendWhoIsTyoing,
   updateRoomMessage,
 } from "../../services/socket";
-
+import API from "../../services/api";
 const RoomRightPanel = () => {
   // refs
   const rightPanelMessageDiv = useRef();
@@ -43,6 +44,7 @@ const RoomRightPanel = () => {
     type: constants.actionTypes.CREATE,
     id: null,
     message: null,
+    isLast: false,
   });
 
   const { username } = useSelector((state) => state.auth);
@@ -64,6 +66,7 @@ const RoomRightPanel = () => {
         room_id: currentRoom.room_id,
         message,
         message_id: action.id,
+        isLast: action.isLast,
       });
     if (action.type === constants.actionTypes.REPLY)
       roomNewMessage({
@@ -77,6 +80,7 @@ const RoomRightPanel = () => {
       type: constants.actionTypes.CREATE,
       id: null,
       message: null,
+      isLast: false,
     });
     if (showEmojiPicker) setShowEmojiPicker(false);
   };
@@ -106,6 +110,17 @@ const RoomRightPanel = () => {
     };
   }, [rightPanel.whoIsTyping, dispatch]);
 
+  useEffect(() => {
+    if (
+      rightPanel.newMessageCome &&
+      rightPanelMessageDiv &&
+      rightPanelMessageDiv.current
+    ) {
+      rightPanelMessageDiv.current.scrollTop = 0;
+      dispatch(setNewMessageCome(false));
+    }
+  }, [rightPanel.newMessageCome, dispatch]);
+
   const next = () => {
     if (!!currentRoom) {
       dispatch(
@@ -123,6 +138,24 @@ const RoomRightPanel = () => {
     setAction({
       ...action,
     });
+  };
+
+  const fetchRoomUsers = async (query, callback) => {
+    try {
+      const res = await API.get(`/rooms/${currentRoom.room_id}`);
+      if (res.status) {
+        callback(
+          res.data.data.map((user) => {
+            return {
+              id: user.user_id,
+              display: user.username,
+            };
+          })
+        );
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -217,6 +250,10 @@ const RoomRightPanel = () => {
                               setShowMessageMenuForMessageId
                             }
                             action={action}
+                            isLast={
+                              rightPanel.messages[0].message_id ===
+                              message.message_id
+                            }
                           />
                         ) : (
                           <RoomLeftMessage
@@ -285,7 +322,7 @@ const RoomRightPanel = () => {
                 >
                   <GrEmoji className="text-2xl lg:text-3xl " />
                 </button>
-                <input
+                {/* <input
                   className="focus:outline-none flex-grow py-0 md:py-1 bg-transparent lg:px-4 "
                   placeholder={`${
                     action.type === constants.actionTypes.EDIT
@@ -304,7 +341,32 @@ const RoomRightPanel = () => {
                       handleMessageSend();
                     }
                   }}
-                />
+                /> */}
+                <MentionsInput
+                  value={message}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    sendWhoIsTyoing(currentRoom.room_id);
+                  }}
+                  placeholder={`${
+                    action.type === constants.actionTypes.EDIT
+                      ? "Upadte message here..."
+                      : action.type === constants.actionTypes.REPLY
+                      ? "Reply message here..."
+                      : "Type message here..."
+                  }`}
+                  allowSuggestionsAboveCursor
+                  className="mentionsInput flex-grow scrollRightPanel"
+                  singleLine
+                >
+                  <Mention
+                    displayTransform={(id, display) => display}
+                    trigger="@"
+                    data={fetchRoomUsers}
+                    markup=" @__display__ "
+                    appendSpaceOnAdd
+                  />
+                </MentionsInput>
 
                 {(action.type === constants.actionTypes.EDIT ||
                   action.type === constants.actionTypes.REPLY) && (
@@ -316,6 +378,7 @@ const RoomRightPanel = () => {
                         type: constants.actionTypes.CREATE,
                         id: null,
                         message: null,
+                        isLast: false,
                       });
                     }}
                   >

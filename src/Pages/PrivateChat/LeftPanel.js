@@ -212,11 +212,11 @@ const LeftPanel = () => {
                             <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
                               {room.roomname}
                             </h1>
-                            {/* {!!room.last_message && (
+                            {!!room.last_message && (
                               <p className="text-gray-400 w-40 truncate">
                                 {room.last_message}
                               </p>
-                            )} */}
+                            )}
                           </div>
                           <div className="flex flex-none items-center">
                             {/* {!!room.totalUnRead && (

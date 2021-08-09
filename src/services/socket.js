@@ -25,6 +25,8 @@ import {
   setWhoIsTyping,
   deleteMessageFromRoom,
   updateMessageToRoom,
+  updateMessageInLeftPanelLastMessage,
+  updateLeftPanelRoomsLastMessage,
 } from "../Pages/PrivateChat/store/privateChatSlice";
 // import * as jwt from "./jwtService";
 
@@ -97,15 +99,26 @@ const connectMainIo = () => {
       }
     });
 
-    socket.on("deleteMessage", ({ messageId, senderId }) => {
-      if (
-        !!store.getState().privateChat.currentUser &&
-        store.getState().privateChat.currentUser.user_id === senderId
-      )
-        store.dispatch(deleteMessageFromCurrentUserMessages(messageId));
-    });
+    socket.on(
+      "deleteMessage",
+      ({ messageId, senderId, isLast, lastMessage }) => {
+        if (
+          !!store.getState().privateChat.currentUser &&
+          store.getState().privateChat.currentUser.user_id === senderId
+        )
+          store.dispatch(deleteMessageFromCurrentUserMessages(messageId));
+        if (isLast) {
+          store.dispatch(
+            updateMessageInLeftPanelLastMessage({
+              userId: senderId,
+              message: lastMessage,
+            })
+          );
+        }
+      }
+    );
 
-    socket.on("updateMessage", ({ messageId, message, senderId }) => {
+    socket.on("updateMessage", ({ messageId, message, senderId, isLast }) => {
       if (
         !!store.getState().privateChat.currentUser &&
         store.getState().privateChat.currentUser.user_id === senderId
@@ -114,9 +127,15 @@ const connectMainIo = () => {
           updateMessageInCurrentUserMessages({ messageId, message })
         );
       }
+      if (isLast) {
+        store.dispatch(
+          updateMessageInLeftPanelLastMessage({ userId: senderId, message })
+        );
+      }
     });
   });
 
+  // Roomssssss
   socket.on("joinNewRoom", (data) => {
     if (store.getState().privateChat.activeTab === 1)
       store.dispatch(
@@ -157,34 +176,61 @@ const connectMainIo = () => {
   socket.on("room_new_message", (data) => {
     if (
       store.getState().privateChat.activeTab === 1 &&
+      !!store.getState().privateChat.currentRoom &&
       store.getState().privateChat.currentRoom.room_id === data.roomId
     ) {
       store.dispatch(addMessageToRoom(data.message));
     }
+    store.dispatch(
+      updateLeftPanelRoomsLastMessage({
+        roomId: data.roomId,
+        message: data.message.text,
+      })
+    );
   });
 
   socket.on("who_is_typing", ({ username, room_id }) => {
     if (
       store.getState().privateChat.activeTab === 1 &&
+      !!store.getState().privateChat.currentRoom &&
       store.getState().privateChat.currentRoom.room_id === room_id
     )
       store.dispatch(setWhoIsTyping(username));
   });
 
-  socket.on("deleteRoomMessage", ({ message_id, room_id }) => {
-    if (
-      store.getState().privateChat.activeTab === 1 &&
-      store.getState().privateChat.currentRoom.room_id === room_id
-    )
-      store.dispatch(deleteMessageFromRoom(message_id));
-  });
+  socket.on(
+    "deleteRoomMessage",
+    ({ message_id, room_id, isLast, last_message }) => {
+      if (
+        store.getState().privateChat.activeTab === 1 &&
+        !!store.getState().privateChat.currentRoom &&
+        store.getState().privateChat.currentRoom.room_id === room_id
+      )
+        store.dispatch(deleteMessageFromRoom(message_id));
+      if (isLast) {
+        store.dispatch(
+          updateLeftPanelRoomsLastMessage({
+            roomId: room_id,
+            message: last_message,
+          })
+        );
+      }
+    }
+  );
 
-  socket.on("updateRoomMessage", ({ message_id, room_id, message }) => {
+  socket.on("updateRoomMessage", ({ message_id, room_id, message, isLast }) => {
     if (
       store.getState().privateChat.activeTab === 1 &&
+      !!store.getState().privateChat.currentRoom &&
       store.getState().privateChat.currentRoom.room_id === room_id
     )
       store.dispatch(updateMessageToRoom({ message_id, message }));
+
+    if (isLast) {
+      store.dispatch(
+        updateLeftPanelRoomsLastMessage({ roomId: room_id, message })
+      );
+    }
   });
 };
 
@@ -251,27 +297,49 @@ export const sendTypingStatus = (receiver_id) => {
   socket.emit("sendTypingStatus", receiver_id);
 };
 
-export const deleteMessage = (messageId, receiverId) => {
-  socket.emit("deleteMessage", { messageId, receiverId }, () => {
-    if (
-      !!store.getState().privateChat.currentUser &&
-      store.getState().privateChat.currentUser.user_id === receiverId
-    )
-      store.dispatch(deleteMessageFromCurrentUserMessages(messageId));
-  });
+export const deleteMessage = (messageId, receiverId, isLast, lastMessage) => {
+  socket.emit(
+    "deleteMessage",
+    { messageId, receiverId, isLast, lastMessage },
+    () => {
+      if (
+        !!store.getState().privateChat.currentUser &&
+        store.getState().privateChat.currentUser.user_id === receiverId
+      )
+        store.dispatch(deleteMessageFromCurrentUserMessages(messageId));
+
+      if (isLast) {
+        store.dispatch(
+          updateMessageInLeftPanelLastMessage({
+            userId: receiverId,
+            message: lastMessage,
+          })
+        );
+      }
+    }
+  );
 };
 
-export const updateMessage = ({ receiverId, message, messageId }) => {
-  socket.emit("updateMessage", { receiverId, message, messageId }, () => {
-    if (
-      !!store.getState().privateChat.currentUser &&
-      store.getState().privateChat.currentUser.user_id === receiverId
-    ) {
-      store.dispatch(
-        updateMessageInCurrentUserMessages({ messageId, message })
-      );
+export const updateMessage = ({ receiverId, message, messageId, isLast }) => {
+  socket.emit(
+    "updateMessage",
+    { receiverId, message, messageId, isLast },
+    () => {
+      if (
+        !!store.getState().privateChat.currentUser &&
+        store.getState().privateChat.currentUser.user_id === receiverId
+      ) {
+        store.dispatch(
+          updateMessageInCurrentUserMessages({ messageId, message })
+        );
+      }
+      if (isLast) {
+        store.dispatch(
+          updateMessageInLeftPanelLastMessage({ userId: receiverId, message })
+        );
+      }
     }
-  });
+  );
 };
 
 // Chat room
@@ -301,6 +369,12 @@ export const roomNewMessage = (data) => {
     ) {
       store.dispatch(addMessageToRoom(data.message));
     }
+    store.dispatch(
+      updateLeftPanelRoomsLastMessage({
+        roomId: data.roomId,
+        message: data.message.text,
+      })
+    );
   });
 };
 
@@ -308,10 +382,17 @@ export const sendWhoIsTyoing = (room_id) => {
   socket.emit("who_is_typing", room_id);
 };
 
-export const deleteRoomMessage = (message_id, room_id) => {
+export const deleteRoomMessage = (
+  message_id,
+  room_id,
+  isLast,
+  last_message
+) => {
   socket.emit("deleteRoomMessage", {
     message_id,
     room_id,
+    isLast,
+    last_message,
   });
 };
 

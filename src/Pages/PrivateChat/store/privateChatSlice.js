@@ -274,6 +274,13 @@ export const privateChatSlice = createSlice({
         }
       });
     },
+    updateMessageInLeftPanelLastMessage: (state, action) => {
+      state.leftPanel.users.forEach((user) => {
+        if (user.user_id === action.payload.userId) {
+          user.last_message = action.payload.message;
+        }
+      });
+    },
     updateLeftPanelUsersLastMessageAndTotalUnRead: (state, action) => {
       state.leftPanel.users.forEach((user) => {
         if (
@@ -371,6 +378,13 @@ export const privateChatSlice = createSlice({
         }
       });
     },
+    updateLeftPanelRoomsLastMessage: (state, action) => {
+      state.leftPanel.rooms.forEach((room) => {
+        if (room.room_id === action.payload.roomId) {
+          room.last_message = action.payload.message;
+        }
+      });
+    },
 
     resetPrivateChat: (state) => initialState,
   },
@@ -459,6 +473,8 @@ export const {
   setWhoIsTyping,
   deleteMessageFromRoom,
   updateMessageToRoom,
+  updateMessageInLeftPanelLastMessage,
+  updateLeftPanelRoomsLastMessage,
 } = privateChatSlice.actions;
 
 export default privateChatSlice.reducer;
