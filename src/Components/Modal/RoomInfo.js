@@ -22,7 +22,7 @@ const RoomInfo = () => {
     if (!!currentRoom) {
       const getRoomInfo = async () => {
         try {
-          const res = await API.get(`/rooms/${currentRoom.room_id}`);
+          const res = await API.get(`/rooms/${currentRoom.room_id}/users`);
           if (res.status) {
             setUsers([...res.data.data]);
           }

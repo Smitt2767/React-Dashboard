@@ -27,6 +27,7 @@ const initialState = {
     newMessageCome: false,
     isTyping: false,
     whoIsTyping: null,
+    isLoading: false,
   },
   showRightPanel: false,
   showCreateRoomModal: false,
@@ -385,7 +386,9 @@ export const privateChatSlice = createSlice({
         }
       });
     },
-
+    setIsLoading: (state, action) => {
+      state.rightPanel.isLoading = action.payload;
+    },
     resetPrivateChat: (state) => initialState,
   },
 
@@ -475,6 +478,7 @@ export const {
   updateMessageToRoom,
   updateMessageInLeftPanelLastMessage,
   updateLeftPanelRoomsLastMessage,
+  setIsLoading,
 } = privateChatSlice.actions;
 
 export default privateChatSlice.reducer;

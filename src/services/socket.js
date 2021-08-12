@@ -27,6 +27,7 @@ import {
   updateMessageToRoom,
   updateMessageInLeftPanelLastMessage,
   updateLeftPanelRoomsLastMessage,
+  setIsLoading,
 } from "../Pages/PrivateChat/store/privateChatSlice";
 // import * as jwt from "./jwtService";
 
@@ -72,10 +73,11 @@ const connectMainIo = () => {
           store.getState().privateChat.currentUser.user_id ===
             message.from_user)
       )
-        store.dispatch(addMessageToUser({ ...message, by_me: 0 }));
+        store.dispatch(addMessageToUser(message));
       else {
         store.dispatch(updateLeftPanelUsersLastMessageAndTotalUnRead(message));
       }
+      store.dispatch(setIsLoading(false));
     });
 
     socket.on("userReadYourMessage", (messageId) => {
@@ -115,6 +117,7 @@ const connectMainIo = () => {
             })
           );
         }
+        store.dispatch(setIsLoading(false));
       }
     );
 
@@ -132,6 +135,7 @@ const connectMainIo = () => {
           updateMessageInLeftPanelLastMessage({ userId: senderId, message })
         );
       }
+      store.dispatch(setIsLoading(false));
     });
   });
 
@@ -281,8 +285,9 @@ export const sendMessageToUser = (data) => {
       (store.getState().privateChat.currentUser.user_id === message.to_user ||
         store.getState().privateChat.currentUser.user_id === message.from_user)
     )
-      store.dispatch(addMessageToUser({ ...message, by_me: 1 }));
+      store.dispatch(addMessageToUser(message));
     store.dispatch(updateLeftPanelUsersLastMessageAndTotalUnRead(message));
+    store.dispatch(setIsLoading(false));
   });
 };
 export const sendUserReadMessage = (messageId, senderId) => {
@@ -316,6 +321,7 @@ export const deleteMessage = (messageId, receiverId, isLast, lastMessage) => {
           })
         );
       }
+      store.dispatch(setIsLoading(false));
     }
   );
 };
@@ -338,6 +344,7 @@ export const updateMessage = ({ receiverId, message, messageId, isLast }) => {
           updateMessageInLeftPanelLastMessage({ userId: receiverId, message })
         );
       }
+      store.dispatch(setIsLoading(false));
     }
   );
 };

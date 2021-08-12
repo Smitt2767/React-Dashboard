@@ -18,6 +18,7 @@ import {
   setCurrentUser,
   setNewMessageCome,
   setIsTyping,
+  setIsLoading,
 } from "./store/privateChatSlice";
 import {
   sendMessageToUser,
@@ -29,9 +30,11 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import RightMessage from "./RightMessage";
 import LeftMessage from "./LeftMessage";
 import constants from "../../constants";
-
+import API from "../../services/api";
 import { FaQuoteLeft } from "react-icons/fa";
 import { IoMdAttach } from "react-icons/io";
+import RightFilesMessage from "./RightFilesMessage";
+import LeftFileMessage from "./LeftFilesMessage";
 const RightPanel = () => {
   // refs
   const rightPanelMessageDiv = useRef();
@@ -108,28 +111,44 @@ const RightPanel = () => {
     }
   }, [currentUser, dispatch, rightPanel.page, rightPanel.limit]);
 
-  const handleMessageSend = () => {
+  const handleMessageSend = async () => {
     if (!message && !!!files.length) return;
-    if (action.type === constants.actionTypes.EDIT)
-      updateMessage({
-        receiverId: currentUser.user_id,
-        message,
-        messageId: action.id,
-        isLast: action.isLast,
-      });
-    else if (action.type === constants.actionTypes.REPLY)
-      sendMessageToUser({
-        to_user: currentUser.user_id,
-        message,
-        replyOf: action.id,
-      });
-    else
-      sendMessageToUser({
-        to_user: currentUser.user_id,
-        message,
-        files,
-        type: !!files.length ? "file" : "text",
-      });
+
+    dispatch(setIsLoading(true));
+
+    if (!!files.length) {
+      try {
+        const formData = new FormData();
+        formData.append("to_user", currentUser.user_id);
+        files.forEach((file) => {
+          formData.append("file", file);
+        });
+
+        await API.post("/chat/files", formData);
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      if (action.type === constants.actionTypes.EDIT)
+        updateMessage({
+          receiverId: currentUser.user_id,
+          message,
+          messageId: action.id,
+          isLast: action.isLast,
+        });
+      else if (action.type === constants.actionTypes.REPLY)
+        sendMessageToUser({
+          to_user: currentUser.user_id,
+          message,
+          replyOf: action.id,
+        });
+      else
+        sendMessageToUser({
+          to_user: currentUser.user_id,
+          message,
+          files,
+        });
+    }
 
     if (rightPanelMessageDiv && rightPanelMessageDiv.current)
       rightPanelMessageDiv.current.scrollTop = 0;
@@ -245,24 +264,41 @@ const RightPanel = () => {
                           </div>
                         )}
                         {!!message.by_me ? (
-                          <RightMessage
-                            message={message}
-                            showMessageMenuForMessageId={
-                              showMessageMenuForMessageId
-                            }
-                            setMessage={setMessage}
-                            onAction={onAction}
-                            setShowMessageMenuForMessageId={
-                              setShowMessageMenuForMessageId
-                            }
-                            deleteMessage={deleteMessage}
-                            action={action}
-                            isLast={
-                              rightPanel.messages[0].message_id ===
-                              message.message_id
-                            }
-                          />
-                        ) : (
+                          message.type === "text" ? (
+                            <RightMessage
+                              message={message}
+                              showMessageMenuForMessageId={
+                                showMessageMenuForMessageId
+                              }
+                              setMessage={setMessage}
+                              onAction={onAction}
+                              setShowMessageMenuForMessageId={
+                                setShowMessageMenuForMessageId
+                              }
+                              deleteMessage={deleteMessage}
+                              action={action}
+                              isLast={
+                                rightPanel.messages[0].message_id ===
+                                message.message_id
+                              }
+                            />
+                          ) : (
+                            <RightFilesMessage
+                              message={message}
+                              showMessageMenuForMessageId={
+                                showMessageMenuForMessageId
+                              }
+                              isLast={
+                                rightPanel.messages[0].message_id ===
+                                message.message_id
+                              }
+                              deleteMessage={deleteMessage}
+                              setShowMessageMenuForMessageId={
+                                setShowMessageMenuForMessageId
+                              }
+                            />
+                          )
+                        ) : message.type === "text" ? (
                           <LeftMessage
                             message={message}
                             showMessageMenuForMessageId={
@@ -273,6 +309,20 @@ const RightPanel = () => {
                             }
                             onAction={onAction}
                             action={action}
+                          />
+                        ) : (
+                          <LeftFileMessage
+                            message={message}
+                            showMessageMenuForMessageId={
+                              showMessageMenuForMessageId
+                            }
+                            isLast={
+                              rightPanel.messages[0].message_id ===
+                              message.message_id
+                            }
+                            setShowMessageMenuForMessageId={
+                              setShowMessageMenuForMessageId
+                            }
                           />
                         )}
                       </React.Fragment>
@@ -323,7 +373,7 @@ const RightPanel = () => {
                 />
               )}
 
-              {!!files.length && (
+              {!!files.length && !rightPanel.isLoading && (
                 <FilesSection
                   files={files}
                   setFiles={setFiles}
@@ -413,8 +463,24 @@ const RightPanel = () => {
               <button
                 className="flex-none border border-gray-50 p-2 rounded-full"
                 onClick={handleMessageSend}
+                disabled={rightPanel.isLoading}
               >
-                <IoIosSend className="text-2xl  lg:text-3xl" />
+                {rightPanel.isLoading ? (
+                  <div className="h-full w-full flex justify-center items-center">
+                    <div className="w-full flex items-center  justify-center ">
+                      <div className="sk-chase">
+                        <div className="sk-chase-dot"></div>
+                        <div className="sk-chase-dot"></div>
+                        <div className="sk-chase-dot"></div>
+                        <div className="sk-chase-dot"></div>
+                        <div className="sk-chase-dot"></div>
+                        <div className="sk-chase-dot"></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <IoIosSend className="text-2xl  lg:text-3xl" />
+                )}
               </button>
             </div>
           </div>

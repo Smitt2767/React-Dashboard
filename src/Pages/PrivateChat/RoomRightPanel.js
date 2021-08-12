@@ -31,10 +31,11 @@ import {
   updateRoomMessage,
 } from "../../services/socket";
 import API from "../../services/api";
+
 const RoomRightPanel = () => {
   // refs
   const rightPanelMessageDiv = useRef();
-
+  const inputRef = useRef();
   // States
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -53,7 +54,7 @@ const RoomRightPanel = () => {
   const dispatch = useDispatch();
 
   const handleMessageSend = () => {
-    if (!message) return;
+    if (!message || !currentRoom.room_id) return;
 
     if (action.type === constants.actionTypes.CREATE) {
       roomNewMessage({
@@ -121,6 +122,15 @@ const RoomRightPanel = () => {
     }
   }, [rightPanel.newMessageCome, dispatch]);
 
+  useEffect(() => {
+    if (inputRef && inputRef.current)
+      inputRef.current.onkeydown = (e) => {
+        if (e.key === "Enter" && e.keyCode === 13) {
+          handleMessageSend();
+        }
+      };
+  }, [inputRef, handleMessageSend]);
+
   const next = () => {
     if (!!currentRoom) {
       dispatch(
@@ -142,7 +152,7 @@ const RoomRightPanel = () => {
 
   const fetchRoomUsers = async (query, callback) => {
     try {
-      const res = await API.get(`/rooms/${currentRoom.room_id}`);
+      const res = await API.get(`/rooms/${currentRoom.room_id}/users`);
       if (res.status) {
         callback(
           res.data.data.map((user) => {
@@ -271,6 +281,7 @@ const RoomRightPanel = () => {
                       </React.Fragment>
                     );
                   })}
+                  {/* <RightFilesMessage /> */}
                 </InfiniteScroll>
               ) : (
                 <div className="h-full w-full flex justify-center items-center">
@@ -343,8 +354,9 @@ const RoomRightPanel = () => {
                   }}
                 /> */}
                 <MentionsInput
+                  inputRef={inputRef}
                   value={message}
-                  onChange={(e) => {
+                  onChange={(e, newValue, newPlainTextValue, mentions) => {
                     setMessage(e.target.value);
                     sendWhoIsTyoing(currentRoom.room_id);
                   }}
@@ -362,8 +374,8 @@ const RoomRightPanel = () => {
                   <Mention
                     displayTransform={(id, display) => display}
                     trigger="@"
+                    markup="@__display__"
                     data={fetchRoomUsers}
-                    markup=" @__display__ "
                     appendSpaceOnAdd
                   />
                 </MentionsInput>
