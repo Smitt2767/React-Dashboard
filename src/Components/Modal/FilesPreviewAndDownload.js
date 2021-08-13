@@ -48,7 +48,7 @@ const FilesPreviewAndDownload = ({ files, setShowModal }) => {
               <AiOutlineClose />
             </button>
           </div>
-          <div className="w-full absolute bottom-0 flex items-center justify-center py-4">
+          <div className="w-full absolute bottom-0 flex items-center justify-center flex-wrap py-4">
             {files.map((file) => {
               return (
                 <div

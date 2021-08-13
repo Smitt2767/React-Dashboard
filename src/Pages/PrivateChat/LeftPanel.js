@@ -165,7 +165,10 @@ const LeftPanel = () => {
                             dispatch(setHasMessage(true));
                           }}
                         >
-                          <ProfileImg username={user.username} />
+                          <ProfileImg
+                            username={user.username}
+                            avatar={user.avatar}
+                          />
                           <div className="flex flex-col ml-4 flex-grow">
                             <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
                               {user.username}

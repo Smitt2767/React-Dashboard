@@ -202,7 +202,10 @@ const RightPanel = () => {
                   dispatch(clearRightPanel());
                 }}
               />
-              <ProfileImg username={currentUser.username} />
+              <ProfileImg
+                username={currentUser.username}
+                avatar={currentUser.avatar}
+              />
               <div className="flex flex-col ml-4 flex-grow">
                 <h1 className="text-xl tracking-widest font-bold  flex-grow capitalize">
                   {currentUser.username}

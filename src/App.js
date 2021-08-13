@@ -47,8 +47,8 @@ const App = () => {
     dispatch(
       setAuthData({
         username: user.username,
-        email: user.email,
         isAuth: !!user,
+        avatar: user.avatar || null,
       })
     );
   }

@@ -105,7 +105,11 @@ const RoomInfo = () => {
                             } px-2`}
                             key={user.user_id}
                           >
-                            <ProfileImg username={user.username} size={85} />
+                            <ProfileImg
+                              username={user.username}
+                              size={85}
+                              avatar={user.avatar}
+                            />
                             <h2 className="flex-grow ml-3 text-gray-700 text-xl">
                               {user.username}
                             </h2>

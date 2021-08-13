@@ -39,7 +39,6 @@ export const authenticate = ({ token, user }, cb) => {
   store.dispatch(
     setAuthData({
       username: user.username,
-      email: user.email,
       isAuth: !!getDataFromLocalStorage(),
     })
   );

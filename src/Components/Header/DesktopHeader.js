@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import ProfileImg from "../ProfileImg";
 
 const DesktopHeader = ({ openMenu, setOpenMenu }) => {
-  const { username } = useSelector((state) => state.auth);
+  const { username, avatar } = useSelector((state) => state.auth);
   return (
     <div className=" h-full flex items-center justify-between px-2 lg:px-8">
       <div
@@ -32,7 +32,7 @@ const DesktopHeader = ({ openMenu, setOpenMenu }) => {
           <BsBell className="text-xl " />
           <div className="absolute rounded-full h-2 w-2 top-0 right-0 bg-blue-400"></div>
         </div>
-        <ProfileImg username={username} size={85} />
+        <ProfileImg username={username} size={85} avatar={avatar} />
       </div>
     </div>
   );

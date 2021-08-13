@@ -27,7 +27,7 @@ const CreateRoom = () => {
     if (isRoomEdit) {
       const getRoomInfo = async () => {
         try {
-          const res = await API.get(`/rooms/${currentRoom.room_id}`);
+          const res = await API.get(`/rooms/${currentRoom.room_id}/users`);
           if (res.status) {
             setRoomname(currentRoom.roomname);
             setUsers([
@@ -94,7 +94,7 @@ const CreateRoom = () => {
           dispatch(setShowCreateRoomModal(false));
         }
       } else {
-        const res = await API.put(`/rooms/${currentRoom.room_id}`, {
+        const res = await API.put(`/rooms/${currentRoom.room_id}/users`, {
           roomname,
           users,
         });

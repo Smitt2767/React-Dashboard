@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { RiDashboardLine } from "react-icons/ri";
-import { AiOutlineHome, AiOutlineClose, AiOutlineForm } from "react-icons/ai";
+import { AiOutlineClose, AiOutlineForm } from "react-icons/ai";
 import {
   BsPower,
   BsTerminal,
   BsPencilSquare,
   BsChatDots,
   BsChatQuote,
+  BsPeopleCircle,
 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
@@ -17,8 +18,8 @@ const routes = [
   {
     id: 1,
     path: "/",
-    name: "Home",
-    icon: <AiOutlineHome className="text-2xl" />,
+    name: "Profile",
+    icon: <BsPeopleCircle className="text-2xl" />,
   },
   {
     id: 2,
