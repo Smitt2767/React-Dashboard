@@ -13,6 +13,33 @@
   background: transparent;
 }
 
+.ag-body-viewport::-webkit-scrollbar {
+  width: 7px;
+}
+.ag-body-viewport::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(209, 213, 219);
+  border-radius: 10px;
+}
+.ag-body-viewport::-webkit-scrollbar-thumb {
+  background: rgb(156, 163, 175);
+}
+.ag-body-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgb(75, 85, 99);
+}
+.ag-body-horizontal-scroll-viewport::-webkit-scrollbar {
+  height: 10px;
+}
+.ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(209, 213, 219);
+  border-radius: 10px;
+}
+.ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb {
+  background: rgb(156, 163, 175);
+}
+.ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgb(75, 85, 99);
+}
+
 .scrollRightPanel::-webkit-scrollbar {
   width: 7px;
 }

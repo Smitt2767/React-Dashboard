@@ -23,6 +23,7 @@ import Chat from "./Pages/Chat";
 import Signup from "./Pages/Auth/SignUp";
 import Login from "./Pages/Auth/Login";
 import PrivateChat from "./Pages/PrivateChat";
+import AgGrid from "./Pages/AgGrid";
 
 import { connectWithWebSocket, joinChatRoom } from "./services/socket";
 import { getDataFromLocalStorage } from "./services/jwtService";
@@ -176,6 +177,13 @@ const App = () => {
             path="/privateChat"
             exact
             component={PrivateChat}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/agGrid"
+            exact
+            component={AgGrid}
             openMenu={openMenu}
             setOpenMenu={setOpenMenu}
           />

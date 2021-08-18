@@ -8,6 +8,7 @@ import {
   BsChatDots,
   BsChatQuote,
   BsPeopleCircle,
+  BsTable,
 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
@@ -53,6 +54,12 @@ const routes = [
     name: "Private Chat",
     icon: <BsChatQuote className="text-2xl" />,
     path: "/privateChat",
+  },
+  {
+    id: 7,
+    name: "Ag-Grid",
+    icon: <BsTable className="text-2xl" />,
+    path: "/agGrid",
   },
 ];
 
