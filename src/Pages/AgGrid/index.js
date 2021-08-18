@@ -1,17 +1,23 @@
 import React, { useState } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { FaFileCsv } from "react-icons/fa";
+import { AiOutlineFilePdf, AiOutlineFileExcel } from "react-icons/ai";
 import axios from "axios";
 import moment from "moment";
-
+import constants from "../../constants";
 import "ag-grid-enterprise";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
+
+import FileDownload from "js-file-download";
+import Loader from "../../Components/Loader";
 
 const AgGrid = () => {
   const [gridApi, setGridApi] = useState(null);
   const [limit, setLimit] = useState(20);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [loadingXlsx, setLoadingXlsx] = useState(false);
+  const [loadingPdf, setLoadingPdf] = useState(false);
+  const [params, setParams] = useState(null);
   const limits = [
     { value: 10, text: "10" },
     { value: 20, text: "20" },
@@ -128,6 +134,10 @@ const AgGrid = () => {
         sorting.sort = colId;
         sorting.order = sort;
       }
+      setParams({
+        filter,
+        ...sorting,
+      });
       try {
         const res = await axios("http://127.0.0.1:3001/olympic", {
           params: {
@@ -171,6 +181,51 @@ const AgGrid = () => {
 
   const getChartToolbarItems = () => {
     return ["chartDownload", "chartData", "chartSettings"];
+  };
+
+  const handleXlsxDownload = async () => {
+    try {
+      setLoadingXlsx(true);
+      const res = await axios.get(`${constants.API_URL}/olympic/generateXlsx`, {
+        responseType: "arraybuffer",
+        params,
+      });
+      if (res.status) {
+        const data = new Blob([res.data], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=UTF-8",
+        });
+
+        FileDownload(data, "olympic.xlsx");
+        setLoadingXlsx(false);
+      }
+    } catch (err) {
+      console.log(err);
+      setLoadingXlsx(false);
+    }
+  };
+  const handlePDFTableDownload = async () => {
+    try {
+      setLoadingPdf(true);
+      const res = await axios.get(
+        `${constants.API_URL}/olympic/generatePdfTable`,
+        {
+          responseType: "arraybuffer",
+          params,
+        }
+      );
+
+      if (res.status) {
+        const data = new Blob([res.data], {
+          type: "application/pdf",
+        });
+
+        FileDownload(data, "olympic.pdf");
+        setLoadingPdf(false);
+      }
+    } catch (err) {
+      console.log(err);
+      setLoadingPdf(false);
+    }
   };
 
   return (
@@ -222,12 +277,22 @@ const AgGrid = () => {
             </div>
 
             <button
-              className="text-2xl bg-blue-600 text-gray-200 p-3 rounded-full shadow-xl hover:bg-blue-700 hover:text-gray-50 focus:outline-none"
+              className="text-2xl bg-blue-600 text-gray-200 p-3 rounded-full shadow-xl hover:bg-blue-700 hover:text-gray-50 focus:outline-none mr-2"
               onClick={() => {
-                gridApi.exportDataAsCsv();
+                handleXlsxDownload();
               }}
+              disabled={loadingXlsx}
             >
-              <FaFileCsv />
+              {loadingXlsx ? <Loader /> : <AiOutlineFileExcel />}
+            </button>
+            <button
+              className="text-2xl bg-red-600 text-gray-200 p-3 rounded-full shadow-xl hover:bg-red-700 hover:text-gray-50 focus:outline-none "
+              onClick={() => {
+                handlePDFTableDownload();
+              }}
+              disabled={loadingPdf}
+            >
+              {loadingPdf ? <Loader /> : <AiOutlineFilePdf />}
             </button>
           </div>
         </div>

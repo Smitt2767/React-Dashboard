@@ -32,7 +32,7 @@ const DesktopHeader = ({ openMenu, setOpenMenu }) => {
           <BsBell className="text-xl " />
           <div className="absolute rounded-full h-2 w-2 top-0 right-0 bg-blue-400"></div>
         </div>
-        <ProfileImg username={username} size={85} avatar={avatar} />
+        <ProfileImg username={username} size={85} />
       </div>
     </div>
   );
