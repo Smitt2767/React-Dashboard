@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import ProfileImg from "../ProfileImg";
 
 const DesktopHeader = ({ openMenu, setOpenMenu }) => {
-  const { username, avatar } = useSelector((state) => state.auth);
+  const { username } = useSelector((state) => state.auth);
   return (
     <div className=" h-full flex items-center justify-between px-2 lg:px-8">
       <div

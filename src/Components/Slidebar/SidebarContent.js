@@ -9,7 +9,10 @@ import {
   BsChatQuote,
   BsPeopleCircle,
   BsTable,
+  BsCreditCard,
+  BsImage,
 } from "react-icons/bs";
+
 import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
 import SidebarSubMenu from "./SidebarSubMenu";
@@ -60,6 +63,21 @@ const routes = [
     name: "Ag-Grid",
     icon: <BsTable className="text-2xl" />,
     path: "/agGrid",
+  },
+  {
+    id: 8,
+    name: "Image Gallery",
+    icon: <BsImage className="text-2xl" />,
+    path: "/imageGallery",
+  },
+  {
+    id: 9,
+    name: "CC Form",
+    icon: <BsCreditCard className="text-2xl" />,
+    routes: [
+      { id: 1, name: "Home", path: "/creditCardForm" },
+      { id: 2, name: "CC Data", path: "/creditCardList" },
+    ],
   },
 ];
 

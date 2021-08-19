@@ -6,7 +6,7 @@ import { setSuccessMessage, setErrorMessage } from "../store/dashboardSlice";
 import { useDispatch } from "react-redux";
 import Form from "../Components/formik/Form";
 import { setLocalStorage } from "../services/jwtService";
-import { setAvatar } from "./Auth/store/authSlice";
+
 const Dashboard = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [avatar, setAvatar] = useState("");

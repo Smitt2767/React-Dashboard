@@ -24,11 +24,13 @@ import Signup from "./Pages/Auth/SignUp";
 import Login from "./Pages/Auth/Login";
 import PrivateChat from "./Pages/PrivateChat";
 import AgGrid from "./Pages/AgGrid";
-
+import ImageGallery from "./Pages/ImageGallery";
+import CreditCardForm from "./Pages/CreditCard";
 import { connectWithWebSocket, joinChatRoom } from "./services/socket";
 import { getDataFromLocalStorage } from "./services/jwtService";
 
 import API from "./services/api";
+import CreditCardData from "./Pages/CreditCard/CreditCardData";
 
 const App = () => {
   const [openMenu, setOpenMenu] = useState(false);
@@ -184,6 +186,27 @@ const App = () => {
             path="/agGrid"
             exact
             component={AgGrid}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/imageGallery"
+            exact
+            component={ImageGallery}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/creditCardForm"
+            exact
+            component={CreditCardForm}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
+            path="/creditCardList"
+            exact
+            component={CreditCardData}
             openMenu={openMenu}
             setOpenMenu={setOpenMenu}
           />
