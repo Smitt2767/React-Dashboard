@@ -57,7 +57,7 @@ const ImageGallery = () => {
             hasMore={true}
             scrollableTarget="scroll"
           >
-            <div className="gallery">
+            <div className="w-full grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-2 gallery">
               {images.map((image) => {
                 return (
                   <LazyLoadImage
@@ -65,6 +65,7 @@ const ImageGallery = () => {
                     effect="blur"
                     src={image.urls.regular}
                     key={image.id}
+                    height="100%"
                   />
                 );
               })}

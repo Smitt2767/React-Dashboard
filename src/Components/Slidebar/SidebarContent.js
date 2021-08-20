@@ -17,6 +17,8 @@ import { Link } from "react-router-dom";
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
 import SidebarSubMenu from "./SidebarSubMenu";
 import { logout } from "../../services/jwtService";
+import { setCurrentRoute } from "./store/sidebarSlice";
+import { useDispatch } from "react-redux";
 
 const routes = [
   {
@@ -84,7 +86,7 @@ const routes = [
 const SidebarContent = ({ openMenu, setOpenMenu }) => {
   const [active, setActive] = useState(1);
   const [subMenuId, setSubMenuId] = useState(null);
-
+  const dispatch = useDispatch();
   useEffect(() => {
     setActive(
       routes.find((route) => {
@@ -110,6 +112,10 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
       .filter((value) => value !== null);
 
     if (!subMenusIds.includes(active)) if (subMenuId) setSubMenuId(null);
+  }, [active, subMenuId]);
+
+  useEffect(() => {
+    dispatch(setCurrentRoute(window.location.pathname));
   }, [active, subMenuId]);
 
   return (

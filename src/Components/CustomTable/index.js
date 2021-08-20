@@ -111,7 +111,7 @@ const Table = ({ columns, data, hasMore, next }) => {
 
   return (
     <div
-      className="h-full w-96 min-w-full overflow-y-auto overflow-x-auto"
+      className="h-full w-96 min-w-full overflow-y-auto overflow-x-auto scrollRightPanel"
       ref={outerDivRef}
     >
       <DndProvider backend={HTML5Backend}>
@@ -139,7 +139,7 @@ const Table = ({ columns, data, hasMore, next }) => {
           <div
             className="tbody bg-gray-200 overflow-y-auto scrollRightPanel"
             style={{
-              height: tableHeight - tableHeaderHeight - tableFooterHeight,
+              height: tableHeight - tableHeaderHeight - tableFooterHeight - 10,
             }}
             id="scrollTBody"
           >

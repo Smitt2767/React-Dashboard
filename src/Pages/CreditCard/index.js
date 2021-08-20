@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NumberFormat from "react-number-format";
 import { useFormik } from "formik";
 import CreditCardInputWrapper from "../../Components/CreditCardInputWrapper";
@@ -12,9 +12,16 @@ import {
 import { AiOutlineExport } from "react-icons/ai";
 import { BsCreditCard } from "react-icons/bs";
 import queryString from "query-string";
+import api from "../../services/api";
+import { setSuccessMessage, setErrorMessage } from "../../store/dashboardSlice";
+import { useDispatch } from "react-redux";
+import Loader from "../../Components/Loader";
 
-const CreditcardForm = ({ location }) => {
-  const query = queryString.parse(location.search);
+const CreditcardForm = ({ location, match, history }) => {
+  const popup =
+    queryString.parse(location.search)?.popup === "true" ? true : false;
+
+  const [loading, setLoading] = useState(false);
 
   const initialValues = {
     cardHolderName: "",
@@ -24,19 +31,73 @@ const CreditcardForm = ({ location }) => {
     balance: "",
   };
 
+  const [isDirty, setIsDirty] = useState(false);
+
+  const [editMode, setEditMode] = useState(false);
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    if (query.popup) {
+    return () => {
+      localStorage.removeItem("creditCardFormData");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (popup) {
       const creditCardFormData = JSON.parse(
         localStorage.getItem("creditCardFormData")
       );
-      console.log(creditCardFormData);
       if (!!creditCardFormData) {
         Object.keys(initialValues).forEach((key) => {
           initialValues[key] = creditCardFormData[key];
         });
       }
+      setEditMode(creditCardFormData.editMode);
     }
-  }, [query.popup]);
+  }, [popup]);
+
+  useEffect(() => {
+    if (match.params.id && !popup) {
+      const id = match.params.id * 1;
+      if (id) {
+        (async () => {
+          try {
+            const res = await api.get(`/cc/${id}`);
+            if (res.status) {
+              const data = res.data.data;
+              initialValues.cardHolderName = data.card_holder_name;
+              initialValues.cardNumber = data.card_number;
+              initialValues.cvv = data.cvv;
+              initialValues.balance = data.balance.toString();
+              const expiryDate = `${data.expiry_month.toString()}${data.expiry_year.toString()}`;
+              initialValues.expiryDate =
+                expiryDate.length === 5 ? `0${expiryDate}` : expiryDate;
+
+              formik.resetForm({ values: initialValues });
+              localStorage.removeItem("creditCardFormData");
+              localStorage.setItem(
+                "creditCardFormData",
+                JSON.stringify({
+                  ...initialValues,
+                  editMode: true,
+                })
+              );
+            }
+          } catch (e) {
+            if (e.response?.data) {
+              dispatch(setErrorMessage(e.response?.data.message));
+              setLoading(false);
+            }
+          }
+        })();
+        setEditMode(true);
+      }
+    }
+
+    return () => {
+      clear();
+    };
+  }, [match.params.id, popup, dispatch]);
 
   const validate = (values) => {
     const errors = {};
@@ -83,10 +144,32 @@ const CreditcardForm = ({ location }) => {
     return errors;
   };
 
-  const onSubmit = (values) => {
-    console.log(values);
+  const onSubmit = async (values) => {
+    try {
+      setLoading(true);
+      if (!editMode) {
+        const res = await api.post("/cc", values);
+        if (res.status) {
+          dispatch(setSuccessMessage(res.data.message));
+          setLoading(false);
+        }
+      } else {
+        const res = await api.put(`/cc/${match.params.id}`, values);
+        if (res.status) {
+          dispatch(setSuccessMessage(res.data.message));
+          setEditMode(false);
+          history.push("/creditCardForm");
+          setLoading(false);
+        }
+      }
+    } catch (e) {
+      if (e.response?.data) {
+        dispatch(setErrorMessage(e.response?.data.message));
+        setLoading(false);
+      }
+    }
 
-    formik.resetForm();
+    formik.resetForm({ values: initialValues });
     localStorage.removeItem("creditCardFormData");
   };
 
@@ -97,27 +180,38 @@ const CreditcardForm = ({ location }) => {
   });
 
   useEffect(() => {
-    return () => {
-      localStorage.removeItem("creditCardFormData");
-    };
-  }, []);
-
-  useEffect(() => {
-    if (formik.dirty)
+    if (isDirty)
       localStorage.setItem(
         "creditCardFormData",
         JSON.stringify({
           ...formik.values,
+          editMode: editMode,
         })
       );
-  }, [formik.values]);
+  }, [formik.values, isDirty, formik.isValid]);
 
   const handleChange = (label, value) => {
+    if (!isDirty) {
+      setIsDirty(true);
+    }
     formik.setFieldValue(label, value);
   };
 
   const capitalizeFirstLetter = (value) => {
     return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+
+  const clear = () => {
+    formik.resetForm({
+      values: {
+        cardHolderName: "",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        balance: "",
+      },
+    });
+    setEditMode(false);
   };
 
   return (
@@ -127,7 +221,7 @@ const CreditcardForm = ({ location }) => {
           <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer flex-grow">
             Credit Card Form
           </h1>
-          {!!!query.popup && (
+          {!!!popup && (
             <button
               className="flex-none text-2xl p-3 rounded-full bg-blue-500 hover:bg-blue-600 text-gray-50 cursor-pointer"
               onClick={() => {
@@ -143,8 +237,8 @@ const CreditcardForm = ({ location }) => {
           )}
         </div>
 
-        <div className="h-full w-full flex items-center justify-center overflow-y-auto">
-          <div className="max-w-lg bg-gray-100 shadow-xl w-96 rounded-lg  relative">
+        <div className="h-full w-full overflow-y-auto">
+          <div className="max-w-lg bg-gray-100 shadow-xl w-96 rounded-lg mt-10 relative mx-auto">
             <div className="absolute -top-12 w-full h-24 flex items-center justify-center">
               <div className="p-4 bg-blue-600 text-gray-200 rounded-full border-4 border-gray-50">
                 <BsCreditCard className="text-4xl" />
@@ -288,11 +382,9 @@ const CreditcardForm = ({ location }) => {
                     className="self-center bg-blue-600 hover:bg-blue-700 text-gray-50 px-8 py-2 rounded-lg font-bold shadow-lg disabled:bg-gray-400"
                     form="creditCardForm"
                     type="submit"
-                    disabled={
-                      !formik.isValid || (!query.popup && !formik.dirty)
-                    }
+                    disabled={!formik.isValid || loading}
                   >
-                    Submit
+                    {loading ? <Loader /> : editMode ? "Save" : "Submit"}
                   </button>
                 </div>
               </form>

@@ -197,6 +197,13 @@ const App = () => {
             setOpenMenu={setOpenMenu}
           />
           <PrivateRoute
+            path="/creditCardForm/:id"
+            exact
+            component={CreditCardForm}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+          />
+          <PrivateRoute
             path="/creditCardForm"
             exact
             component={CreditCardForm}
@@ -210,7 +217,6 @@ const App = () => {
             openMenu={openMenu}
             setOpenMenu={setOpenMenu}
           />
-
           <Route component={_404} />
         </Switch>
       </Router>
