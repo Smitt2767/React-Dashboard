@@ -53,25 +53,26 @@ const RoomRightPanel = () => {
     useSelector((state) => state.privateChat);
   const dispatch = useDispatch();
 
-  const handleMessageSend = () => {
-    if (!message || !currentRoom.room_id) return;
+  const handleMessageSend = React.useCallback(() => {
+    if (!message || !currentRoom?.room_id) return;
 
     if (action.type === constants.actionTypes.CREATE) {
       roomNewMessage({
-        room_id: currentRoom.room_id,
+        room_id: currentRoom?.room_id,
         message,
       });
     }
+
     if (action.type === constants.actionTypes.EDIT)
       updateRoomMessage({
-        room_id: currentRoom.room_id,
+        room_id: currentRoom?.room_id,
         message,
         message_id: action.id,
         isLast: action.isLast,
       });
     if (action.type === constants.actionTypes.REPLY)
       roomNewMessage({
-        room_id: currentRoom.room_id,
+        room_id: currentRoom?.room_id,
         message,
         replyOf: action.id,
       });
@@ -84,7 +85,14 @@ const RoomRightPanel = () => {
       isLast: false,
     });
     if (showEmojiPicker) setShowEmojiPicker(false);
-  };
+  }, [
+    action.id,
+    action.isLast,
+    action.type,
+    currentRoom?.room_id,
+    message,
+    showEmojiPicker,
+  ]);
 
   useEffect(() => {
     if (!!currentRoom && rightPanel.page === 1) {

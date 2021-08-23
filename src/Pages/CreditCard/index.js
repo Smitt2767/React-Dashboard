@@ -31,8 +31,6 @@ const CreditcardForm = ({ location, match, history }) => {
     balance: "",
   };
 
-  const [isDirty, setIsDirty] = useState(false);
-
   const [editMode, setEditMode] = useState(false);
   const dispatch = useDispatch();
 
@@ -43,21 +41,21 @@ const CreditcardForm = ({ location, match, history }) => {
   }, []);
 
   useEffect(() => {
-    if (popup) {
+    if (popup || !popup) {
       const creditCardFormData = JSON.parse(
         localStorage.getItem("creditCardFormData")
       );
       if (!!creditCardFormData) {
         Object.keys(initialValues).forEach((key) => {
-          initialValues[key] = creditCardFormData[key];
+          formik.setFieldValue(key, creditCardFormData[key]);
         });
+        setEditMode(creditCardFormData.editMode);
       }
-      setEditMode(creditCardFormData.editMode);
     }
   }, [popup]);
 
   useEffect(() => {
-    if (match.params.id && !popup) {
+    if (match.params.id) {
       const id = match.params.id * 1;
       if (id) {
         (async () => {
@@ -73,15 +71,27 @@ const CreditcardForm = ({ location, match, history }) => {
               initialValues.expiryDate =
                 expiryDate.length === 5 ? `0${expiryDate}` : expiryDate;
 
-              formik.resetForm({ values: initialValues });
-              localStorage.removeItem("creditCardFormData");
-              localStorage.setItem(
-                "creditCardFormData",
-                JSON.stringify({
-                  ...initialValues,
-                  editMode: true,
-                })
-              );
+              formik.resetForm({ values: { ...initialValues } });
+              if (!popup) {
+                localStorage.removeItem("creditCardFormData");
+                localStorage.setItem(
+                  "creditCardFormData",
+                  JSON.stringify({
+                    ...initialValues,
+                    editMode: true,
+                  })
+                );
+              } else {
+                const creditCardFormData = JSON.parse(
+                  localStorage.getItem("creditCardFormData")
+                );
+                if (!!creditCardFormData) {
+                  Object.keys(initialValues).forEach((key) => {
+                    formik.setFieldValue(key, creditCardFormData[key]);
+                  });
+                  setEditMode(creditCardFormData.editMode);
+                }
+              }
             }
           } catch (e) {
             if (e.response?.data) {
@@ -180,7 +190,7 @@ const CreditcardForm = ({ location, match, history }) => {
   });
 
   useEffect(() => {
-    if (isDirty)
+    if (!popup)
       localStorage.setItem(
         "creditCardFormData",
         JSON.stringify({
@@ -188,12 +198,9 @@ const CreditcardForm = ({ location, match, history }) => {
           editMode: editMode,
         })
       );
-  }, [formik.values, isDirty, formik.isValid]);
+  }, [formik.values, editMode, popup]);
 
   const handleChange = (label, value) => {
-    if (!isDirty) {
-      setIsDirty(true);
-    }
     formik.setFieldValue(label, value);
   };
 
@@ -382,8 +389,9 @@ const CreditcardForm = ({ location, match, history }) => {
                     className="self-center bg-blue-600 hover:bg-blue-700 text-gray-50 px-8 py-2 rounded-lg font-bold shadow-lg disabled:bg-gray-400"
                     form="creditCardForm"
                     type="submit"
-                    disabled={!formik.isValid || loading}
+                    disabled={!formik.isValid || !formik.dirty || loading}
                   >
+                    {console.log(formik)}
                     {loading ? <Loader /> : editMode ? "Save" : "Submit"}
                   </button>
                 </div>

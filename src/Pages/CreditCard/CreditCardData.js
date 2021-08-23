@@ -12,7 +12,8 @@ const CKList = ({ history }) => {
 
   const [rows, setRows] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [limit, setLimit] = useState(10);
+  const limit = 10;
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -134,7 +135,7 @@ const CKList = ({ history }) => {
         minWidth: 150,
       },
     ],
-    [totalRecords, dispatch, history]
+    [totalRecords, history]
   );
 
   useEffect(() => {
@@ -208,15 +209,17 @@ const CKList = ({ history }) => {
         />
       )}
 
-      <CustomTable
-        columns={columns}
-        data={rows}
-        hasMore={hasMore}
-        setId={setId}
-        dispatch={dispatch}
-        setShowModal={setShowModal}
-        next={next}
-      />
+      {!loading && (
+        <CustomTable
+          columns={columns}
+          data={rows}
+          hasMore={hasMore}
+          setId={setId}
+          dispatch={dispatch}
+          setShowModal={setShowModal}
+          next={next}
+        />
+      )}
     </div>
   );
 };

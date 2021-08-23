@@ -24,7 +24,7 @@ const ImageGallery = () => {
         });
 
         if (res.status) {
-          setImages([...images, ...res.data]);
+          setImages((prevState) => [...prevState, ...res.data]);
         }
       } catch (err) {
         console.log(err);
@@ -57,7 +57,7 @@ const ImageGallery = () => {
             hasMore={true}
             scrollableTarget="scroll"
           >
-            <div className="w-full grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-2 gallery">
+            <div className="w-full grid grid-cols-1 md:grid-cols-4  gap-2 gallery">
               {images.map((image) => {
                 return (
                   <LazyLoadImage

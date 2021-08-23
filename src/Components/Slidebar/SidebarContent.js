@@ -116,7 +116,7 @@ const SidebarContent = ({ openMenu, setOpenMenu }) => {
 
   useEffect(() => {
     dispatch(setCurrentRoute(window.location.pathname));
-  }, [active, subMenuId]);
+  }, [active, subMenuId, dispatch]);
 
   return (
     <div className="h-full flex flex-col text-white">

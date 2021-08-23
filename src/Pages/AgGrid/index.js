@@ -14,7 +14,6 @@ import Loader from "../../Components/Loader";
 const AgGrid = () => {
   const [gridApi, setGridApi] = useState(null);
   const [limit, setLimit] = useState(20);
-  const [selectedRows, setSelectedRows] = useState([]);
   const [loadingXlsx, setLoadingXlsx] = useState(false);
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [params, setParams] = useState(null);
@@ -171,7 +170,7 @@ const AgGrid = () => {
   };
 
   const onSelectionChanged = (e) => {
-    setSelectedRows([...e.api.getSelectedRows()]);
+    console.log(e.api.getSelectedRows());
   };
 
   const onLimitChange = (value) => {

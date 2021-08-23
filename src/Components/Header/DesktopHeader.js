@@ -8,9 +8,9 @@ const DesktopHeader = ({ openMenu, setOpenMenu }) => {
   const { username } = useSelector((state) => state.auth);
   const { currentRoute } = useSelector((state) => state.sidebar);
   const [showTextInput, setShowTextInput] = useState(false);
-  const allowdRoutes = ["/ckeditorlist", "/agGrid", "/creditCardList"];
 
   useEffect(() => {
+    const allowdRoutes = ["/ckeditorlist", "/agGrid", "/creditCardList"];
     setShowTextInput(allowdRoutes.includes(currentRoute));
   }, [currentRoute]);
 
