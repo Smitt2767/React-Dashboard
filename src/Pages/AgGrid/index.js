@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { AiOutlineFilePdf, AiOutlineFileExcel } from "react-icons/ai";
+import { BiFilterAlt } from "react-icons/bi";
 import axios from "axios";
 import moment from "moment";
 import constants from "../../constants";
@@ -10,22 +11,19 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 
 import FileDownload from "js-file-download";
 import Loader from "../../Components/Loader";
+import QueryBuilderModal from "./QueryBuilderModal";
+import { useDispatch } from "react-redux";
+import { setColumns } from "./store/agGridSlice";
 
 const AgGrid = () => {
   const [gridApi, setGridApi] = useState(null);
-  const [limit, setLimit] = useState(20);
   const [loadingXlsx, setLoadingXlsx] = useState(false);
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [params, setParams] = useState(null);
-  const limits = [
-    { value: 10, text: "10" },
-    { value: 20, text: "20" },
-    { value: 30, text: "30" },
-    { value: 50, text: "50" },
-    { value: 100, text: "100" },
-    { value: 150, text: "150" },
-    { value: 200, text: "200" },
-  ];
+
+  const [showModal, setShowModal] = useState(false);
+
+  const dispatch = useDispatch();
 
   const columns = [
     {
@@ -119,10 +117,33 @@ const AgGrid = () => {
     },
   ];
 
+  useEffect(() => {
+    dispatch(
+      setColumns(
+        columns.map((column) => {
+          return {
+            filterType:
+              column.filter === "agDateColumnFilter"
+                ? "date"
+                : column.filter === "agNumberColumnFilter"
+                ? "number"
+                : "text",
+            name: column.field,
+            type:
+              column.filter === "agDateColumnFilter"
+                ? "equals"
+                : column.filter === "agNumberColumnFilter"
+                ? "equals"
+                : "contains",
+          };
+        })
+      )
+    );
+  }, [dispatch]);
+
   const datasource = {
     async getRows(params) {
       const { startRow, filterModel, sortModel, endRow } = params;
-
       // Filter
       const filter = filterModel;
 
@@ -138,7 +159,7 @@ const AgGrid = () => {
         ...sorting,
       });
       try {
-        const res = await axios("http://127.0.0.1:3001/olympic", {
+        const res = await axios(`${constants.API_URL}/olympic`, {
           params: {
             start: startRow,
             limit: endRow - startRow,
@@ -171,11 +192,6 @@ const AgGrid = () => {
 
   const onSelectionChanged = (e) => {
     console.log(e.api.getSelectedRows());
-  };
-
-  const onLimitChange = (value) => {
-    setLimit(value);
-    gridApi.paginationSetPageSize(value);
   };
 
   const getChartToolbarItems = () => {
@@ -227,103 +243,123 @@ const AgGrid = () => {
     }
   };
 
-  return (
-    <div className="w-full h-full">
-      <div className="w-full h-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-hidden">
-        <div className="flex  items-center mb-4 w-full ">
-          <div className="flex-grow flex items-center">
-            <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer">
-              Ag Grid
-            </h1>
-            <p className="text-sm text-gray-500 font-bold ml-1 self-end hidden lg:block capitalize">
-              with pagination (custom limits) / filter (based on number, text,
-              date) / sort (by asc, desc) / custom column (total).
-            </p>
-          </div>
+  const StatusBarLeftComponent = (props) => {
+    return (
+      <div className="w-full h-12 flex items-center">
+        <div
+          className="bg-gray-200 text-gray-800 p-2 rounded-full cursor-pointer hover:bg-gray-300"
+          onClick={() => {
+            setShowModal(!showModal);
+          }}
+        >
+          <BiFilterAlt className="text-xl " />
+        </div>
+      </div>
+    );
+  };
 
-          <div className="flex-none flex items-center">
-            <div className="flex items-center self-end">
-              <label
-                className="pr-1 font-bold text-sm text-gray-500"
-                htmlFor="limit"
-              >
-                Limit
-              </label>
-              <select
-                onChange={(e) => {
-                  onLimitChange(e.target.value * 1);
-                }}
-                className="mr-4 border-2 border-gray-400 rounded-lg focus:outline-none px-2 cursor-pointer"
-                defaultValue={limit}
-                id="limit"
-              >
-                {limits.map((data) => {
-                  return (
-                    <option
-                      value={data.value}
-                      className={`${
-                        limit === data.value
-                          ? "bg-gray-400"
-                          : "bg-gray-700 text-gray-50"
-                      } font-bold  border-0`}
-                      key={data.value}
-                    >
-                      {data.text}
-                    </option>
-                  );
-                })}
-              </select>
+  const StatusBarRightComponent = ({ api }) => {
+    const handleClearBtnClick = () => {
+      api.setFilterModel(null);
+    };
+
+    return (
+      <div className="w-full h-12 flex items-center">
+        <button
+          className="px-4 py-1 text-gray-100 font-bold text-md bg-yellow-400 hover:bg-yellow-500 rounded-full"
+          onClick={handleClearBtnClick}
+        >
+          Clear
+        </button>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {showModal && (
+        <QueryBuilderModal setShowModal={setShowModal} gridApi={gridApi} />
+      )}
+      <div className="w-full h-full">
+        <div className="w-full h-full py-4 px-4 lg:px-8 flex items-start flex-col overflow-hidden">
+          <div className="flex  items-center mb-4 w-full ">
+            <div className="flex-grow flex items-center">
+              <h1 className="text-4xl text-gray-800 hover:text-gray-500 cursor-pointer">
+                Ag Grid
+              </h1>
+              <p className="text-sm text-gray-500 font-bold ml-1 self-end hidden lg:block capitalize">
+                with infinite scrolling / filter (based on number, text, date) /
+                sort (by asc, desc) / custom column (total).
+              </p>
             </div>
 
-            <button
-              className="text-2xl bg-blue-600 text-gray-200 p-3 rounded-full shadow-xl hover:bg-blue-700 hover:text-gray-50 focus:outline-none mr-2"
-              onClick={() => {
-                handleXlsxDownload();
-              }}
-              disabled={loadingXlsx}
-            >
-              {loadingXlsx ? <Loader /> : <AiOutlineFileExcel />}
-            </button>
-            <button
-              className="text-2xl bg-red-600 text-gray-200 p-3 rounded-full shadow-xl hover:bg-red-700 hover:text-gray-50 focus:outline-none "
-              onClick={() => {
-                handlePDFTableDownload();
-              }}
-              disabled={loadingPdf}
-            >
-              {loadingPdf ? <Loader /> : <AiOutlineFilePdf />}
-            </button>
+            <div className="flex-none flex items-center">
+              <button
+                className="text-2xl bg-blue-600 text-gray-200 p-3 rounded-full shadow-xl hover:bg-blue-700 hover:text-gray-50 focus:outline-none mr-2"
+                onClick={() => {
+                  handleXlsxDownload();
+                }}
+                disabled={loadingXlsx}
+              >
+                {loadingXlsx ? <Loader /> : <AiOutlineFileExcel />}
+              </button>
+              <button
+                className="text-2xl bg-red-600 text-gray-200 p-3 rounded-full shadow-xl hover:bg-red-700 hover:text-gray-50 focus:outline-none "
+                onClick={() => {
+                  handlePDFTableDownload();
+                }}
+                disabled={loadingPdf}
+              >
+                {loadingPdf ? <Loader /> : <AiOutlineFilePdf />}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="w-full h-full overflow-auto">
-          <div className="ag-theme-alpine w-full h-full">
-            <AgGridReact
-              columnDefs={columns}
-              rowModelType={"infinite"}
-              // pagination={true}
-              paginationPageSize={limit}
-              cacheBlockSize={50}
-              onGridReady={onGridReady}
-              defaultColDef={{
-                filter: true,
-                floatingFilter: true,
-                sortable: true,
-                resizable: true,
-                minWidth: 100,
-              }}
-              enableRangeSelection={true}
-              components={components}
-              rowSelection="multiple"
-              onSelectionChanged={onSelectionChanged}
-              rowMultiSelectWithClick
-              enableCharts={true}
-              getChartToolbarItems={getChartToolbarItems}
-            />
+          <div className="w-full h-full overflow-auto">
+            <div className="ag-theme-alpine w-full h-full">
+              <AgGridReact
+                columnDefs={columns}
+                rowModelType={"infinite"}
+                // pagination={true}
+                paginationPageSize={20}
+                cacheBlockSize={50}
+                onGridReady={onGridReady}
+                defaultColDef={{
+                  filter: true,
+                  floatingFilter: true,
+                  sortable: true,
+                  resizable: true,
+                  minWidth: 100,
+                }}
+                enableRangeSelection={true}
+                components={components}
+                rowSelection="multiple"
+                onSelectionChanged={onSelectionChanged}
+                rowMultiSelectWithClick
+                enableCharts={true}
+                getChartToolbarItems={getChartToolbarItems}
+                frameworkComponents={{
+                  statusBarLeftComponent: StatusBarLeftComponent,
+                  statusBarRightComponent: StatusBarRightComponent,
+                }}
+                statusBar={{
+                  statusPanels: [
+                    {
+                      statusPanel: "statusBarLeftComponent",
+                      align: "left",
+                    },
+                    {
+                      statusPanel: "statusBarRightComponent",
+                      align: "right",
+                    },
+                  ],
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
