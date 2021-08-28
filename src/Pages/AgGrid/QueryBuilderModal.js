@@ -4,7 +4,7 @@ import ReactJson from "react-json-view";
 import Menu from "./Menu";
 import Queries from "./Queries";
 import { useSelector, useDispatch } from "react-redux";
-import { addNewDefaultFilter, clearFilters } from "./store/agGridSlice";
+import { addNewDefaultFilter, setFilters } from "./store/agGridSlice";
 
 const menuData = ["Add Condition", "Add Group"];
 
@@ -138,7 +138,7 @@ const QueryBuilderModal = ({ setShowModal, gridApi }) => {
                     <button
                       className="bg-yellow-500 px-4 py-1 text-md font-bold text-gray-50 hover:bg-yellow-600 rounded-full mr-2"
                       onClick={() => {
-                        dispatch(clearFilters());
+                        dispatch(setFilters([]));
                         gridApi.setFilterModel(null);
                       }}
                     >
@@ -150,7 +150,7 @@ const QueryBuilderModal = ({ setShowModal, gridApi }) => {
                       onClick={() => {
                         gridApi.setFilterModel(getFilterModel());
                         setShowModal(false);
-                        dispatch(clearFilters());
+                        dispatch(setFilters([]));
                       }}
                     >
                       Submit

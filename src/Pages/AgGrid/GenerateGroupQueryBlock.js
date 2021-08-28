@@ -4,7 +4,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import GroupQuery from "./GroupQuery";
 import Menu from "./Menu";
 import { handleDelete, handleOperatorChange } from "./store/agGridSlice";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 
 const GenerateGroupQueryBlock = ({ column }) => {
   const [showOperatorMenu, setShowOperatorMenu] = useState(false);

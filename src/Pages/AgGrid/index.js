@@ -8,114 +8,111 @@ import constants from "../../constants";
 import "ag-grid-enterprise";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
-
 import FileDownload from "js-file-download";
 import Loader from "../../Components/Loader";
 import QueryBuilderModal from "./QueryBuilderModal";
 import { useDispatch } from "react-redux";
 import { setColumns } from "./store/agGridSlice";
 
+const columns = [
+  {
+    headerName: "Id",
+    field: "id",
+    filter: "agNumberColumnFilter",
+    cellRenderer: "loading",
+    width: 100,
+  },
+  {
+    headerName: "Athlete",
+    field: "athlete",
+    filter: "agTextColumnFilter",
+    flex: 1,
+  },
+  {
+    headerName: "Age",
+    field: "age",
+    filter: "agNumberColumnFilter",
+    width: 100,
+  },
+  {
+    headerName: "Country",
+    field: "country",
+    filter: "agTextColumnFilter",
+    chartDataType: "category",
+  },
+  {
+    headerName: "Year",
+    field: "year",
+    filter: "agNumberColumnFilter",
+    width: 130,
+  },
+  {
+    headerName: "Date",
+    field: "date",
+    filter: "agDateColumnFilter",
+    cellRendererFramework: (params) => {
+      return moment(params.value).format("DD/MM/YYYY");
+    },
+    width: 210,
+  },
+  {
+    headerName: "Sport",
+    field: "sport",
+    filter: "agTextColumnFilter",
+    width: 200,
+  },
+  {
+    headerName: "Gold",
+    field: "gold",
+    filter: "agNumberColumnFilter",
+    width: 100,
+    chartDataType: "series",
+  },
+  {
+    headerName: "Silver",
+    field: "silver",
+    filter: "agNumberColumnFilter",
+    width: 100,
+    chartDataType: "series",
+  },
+  {
+    headerName: "Bronze",
+    field: "bronze",
+    filter: "agNumberColumnFilter",
+    width: 100,
+    chartDataType: "series",
+  },
+  {
+    headerName: "Total",
+    field: "total",
+    filter: "agNumberColumnFilter",
+    cellRendererFramework: (params) => {
+      const { data } = params;
+      if (!!data) {
+        return data.gold + data.silver + data.bronze;
+      } else return 0;
+    },
+    cellStyle: (params) => {
+      const { data } = params;
+      if (!!data) {
+        const value = data.gold + data.silver + data.bronze;
+        return value > 4
+          ? { borderLeft: "4px solid green" }
+          : { borderLeft: "4px solid red" };
+      } else return {};
+    },
+    width: 100,
+    chartDataType: "series",
+  },
+];
+
 const AgGrid = () => {
   const [gridApi, setGridApi] = useState(null);
   const [loadingXlsx, setLoadingXlsx] = useState(false);
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [params, setParams] = useState(null);
-
   const [showModal, setShowModal] = useState(false);
-
   const dispatch = useDispatch();
-
-  const columns = [
-    {
-      headerName: "Id",
-      field: "id",
-      filter: "agNumberColumnFilter",
-      cellRenderer: "loading",
-      width: 100,
-    },
-    {
-      headerName: "Athlete",
-      field: "athlete",
-      filter: "agTextColumnFilter",
-      flex: 1,
-    },
-    {
-      headerName: "Age",
-      field: "age",
-      filter: "agNumberColumnFilter",
-      width: 100,
-    },
-    {
-      headerName: "Country",
-      field: "country",
-      filter: "agTextColumnFilter",
-      chartDataType: "category",
-    },
-    {
-      headerName: "Year",
-      field: "year",
-      filter: "agNumberColumnFilter",
-      width: 130,
-    },
-    {
-      headerName: "Date",
-      field: "date",
-      filter: "agDateColumnFilter",
-      cellRendererFramework: (params) => {
-        return moment(params.value).format("DD/MM/YYYY");
-      },
-      width: 210,
-    },
-    {
-      headerName: "Sport",
-      field: "sport",
-      filter: "agTextColumnFilter",
-      width: 200,
-    },
-    {
-      headerName: "Gold",
-      field: "gold",
-      filter: "agNumberColumnFilter",
-      width: 100,
-      chartDataType: "series",
-    },
-    {
-      headerName: "Silver",
-      field: "silver",
-      filter: "agNumberColumnFilter",
-      width: 100,
-      chartDataType: "series",
-    },
-    {
-      headerName: "Bronze",
-      field: "bronze",
-      filter: "agNumberColumnFilter",
-      width: 100,
-      chartDataType: "series",
-    },
-    {
-      headerName: "Total",
-      field: "total",
-      filter: "agNumberColumnFilter",
-      cellRendererFramework: (params) => {
-        const { data } = params;
-        if (!!data) {
-          return data.gold + data.silver + data.bronze;
-        } else return 0;
-      },
-      cellStyle: (params) => {
-        const { data } = params;
-        if (!!data) {
-          const value = data.gold + data.silver + data.bronze;
-          return value > 4
-            ? { borderLeft: "4px solid green" }
-            : { borderLeft: "4px solid red" };
-        } else return {};
-      },
-      width: 100,
-      chartDataType: "series",
-    },
-  ];
 
   useEffect(() => {
     dispatch(
@@ -146,7 +143,6 @@ const AgGrid = () => {
       const { startRow, filterModel, sortModel, endRow } = params;
       // Filter
       const filter = filterModel;
-
       // Sort
       const sorting = {};
       if (sortModel.length) {

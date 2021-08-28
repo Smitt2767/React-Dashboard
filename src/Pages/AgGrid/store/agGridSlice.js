@@ -193,13 +193,15 @@ const agGridSlice = createSlice({
       });
     },
     //
-    clearFilters: (state, action) => {
-      state.filters = [];
+    setFilters: (state, action) => {
+      state.filters = [...action.payload];
     },
+    //
   },
 });
 
 export default agGridSlice.reducer;
+
 export const {
   setColumns,
   addNewDefaultFilter,
@@ -210,5 +212,5 @@ export const {
   handleColumnNumberInputChange,
   handleColumnDateInputChnage,
   handleOperatorChange,
-  clearFilters,
+  setFilters,
 } = agGridSlice.actions;
